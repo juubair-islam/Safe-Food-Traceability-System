@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Safe Food Traceability System</title>
+    <link rel="stylesheet" href="css/admin_dashboard.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/jquery.dataTables.min.css">
+</head>
+<body>
+    <header class="sticky-header">
+        <div class="header-content">
+            <img src="images/Logo.png" alt="Farm to Fork Logo" class="logo">
+            <h1>Farm to Fork</h1>
+        </div>
+        <nav>
+            <a href="dashboard_admin.html" class="active">Dashboard</a>
+            <a href="manage_users.html">Manage Users</a>
+            <a href="report_generate.html">Generate Reports</a>
+            <a href="traceability_control.html">Traceability Control</a>
+            <a href="waste_management.html">Waste Management</a>
+            <a href="system_control.html">System Control</a>
+            <a href="logout.php">Logout</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="widgets">
+            <div class="widget">
+                <h3>Total Users</h3>
+                <p id="total-users">Loading...</p>
+            </div>
+            <div class="widget">
+                <h3>Total Batches</h3>
+                <p id="total-batches">Loading...</p>
+            </div>
+            <div class="widget">
+                <h3>Quality Checks</h3>
+                <p id="quality-checks">Loading...</p>
+            </div>
+        </section>
+
+        <section class="charts">
+            <div class="chart-container">
+                <h3>Batch Status Overview</h3>
+                <canvas id="batchStatusChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>Waste Management Analysis</h3>
+                <canvas id="wasteManagementChart"></canvas>
+            </div>
+        </section>
+
+        <section class="table-section">
+            <h3>Registered Users</h3>
+            <table id="usersTable" class="display">
+                <thead>
+                    <tr>
+                        <th>User ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Region</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Data will be dynamically loaded -->
+                </tbody>
+            </table>
+        </section>
+
+        <section class="traceability-section">
+            <h3>Traceability Control</h3>
+            <button id="trackBatchBtn">Track Batch</button>
+            <div id="traceabilityOutput">Traceability information will be displayed here.</div>
+            <h4>Batch Details</h4>
+            <table id="batchDetailsTable" class="display">
+                <thead>
+                    <tr>
+                        <th>Batch ID</th>
+                        <th>Origin</th>
+                        <th>Variety</th>
+                        <th>Harvest Date</th>
+                        <th>Certifications</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Batch details will be dynamically loaded -->
+                </tbody>
+            </table>
+        </section>
+
+        <section class="quality-control-section">
+            <h3>Quality Control Checks</h3>
+            <button id="viewQualityBtn">View Quality Control Data</button>
+            <div id="qualityOutput">Quality control data will be displayed here.</div>
+        </section>
+
+        <section class="affected-products-section">
+            <h3>Affected Products Management</h3>
+            <button id="manageAffectedBtn">Manage Affected Products</button>
+            <div id="affectedOutput">Affected products data will be displayed here.</div>
+        </section>
+    </main>
+
+    <footer class="sticky-footer">
+        <p>© 2024 Farm to Fork . All Rights Reserved.</p>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+    <script src="js/admin_dashboard.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Initialize DataTable for users and batch details
+            $('#usersTable').DataTable();
+            $('#batchDetailsTable').DataTable();
+
+            // Load initial data
+            loadDashboardData();
+
+            // Event listeners for buttons
+            $('#trackBatchBtn').click(function() {
+                trackBatch();
+            });
+
+            $('#viewQualityBtn').click(function() {
+                viewQualityControlData();
+            });
+
+            $('#manageAffectedBtn').click(function() {
+                manageAffectedProducts();
+            });
+        });
+
+        function loadDashboardData() {
+            // Simulated data loading
+            $('#total-users').text(100); // Example data
+            $('#total-batches').text(50); // Example data
+            $('#quality-checks').text(30); // Example data
+
+            // Load batch details and other data as needed
+        }
+
+        function trackBatch() {
+            // Simulated batch tracking
+            $('#traceabilityOutput').text('Batch tracking information displayed here.'); // Example output
+            // Load batch details dynamically
+        }
+
+        function viewQualityControlData() {
+            // Simulated quality control data view
+            $('#qualityOutput').text('Quality control data displayed here.'); // Example output
+        }
+
+        function manageAffectedProducts() {
+            // Simulated affected products management
+            $('#affectedOutput').text('Affected products data displayed here.'); // Example output
+        }
+    </script>
+</body>
+</html>

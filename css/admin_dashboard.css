@@ -1,0 +1,207 @@
+/* General Page Styles */
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f4f8; /* Light background */
+    color: #333;
+}
+
+/* Sticky Header */
+.sticky-header {
+    background: linear-gradient(90deg, #4CAF50, #388E3C); /* Darker green gradient */
+    color: white;
+    padding: 10px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+}
+
+.logo {
+    width: 50px; /* Adjust logo size */
+    margin-right: 15px;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+/* Navbar */
+header nav {
+    display: flex;
+    gap: 20px;
+}
+
+header nav a {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+    padding: 5px 10px;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+header nav a:hover, header nav a.active {
+    background-color: #FFD700; /* Yellow */
+    color: #2E8B57;
+}
+
+/* Widgets Section */
+.widgets {
+    display: flex;
+    justify-content: space-around;
+    margin: 20px;
+    gap: 20px;
+}
+
+.widget {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    flex: 1;
+}
+
+.widget h3 {
+    color: #388E3C; /* Darker green */
+    margin: 0 0 10px 0;
+}
+
+.widget p {
+    font-size: 24px;
+    margin: 0;
+    font-weight: bold;
+    color: #4CAF50; /* Lighter green */
+}
+
+/* Charts Section */
+.charts {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    margin: 20px;
+    gap: 20px;
+}
+
+.chart-container {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    flex: 1;
+    min-width: 400px;
+    max-width: 600px;
+}
+
+.chart-container h3 {
+    text-align: center;
+    color: #388E3C; /* Darker green }
+
+/* Table Section */
+.table-section {
+    margin: 20px;
+    padding: 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.table-section h3 {
+    color: #388E3C; /* Darker green */
+    margin-bottom: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table th, table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+table th {
+    background: #4CAF50; /* Darker green */
+    color: white;
+}
+
+table tbody tr:hover {
+    background-color: #f0f0f0;
+}
+
+table button {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+table button.edit {
+    background-color: #FFD700; /* Yellow */
+    color: white;
+}
+
+table button.edit:hover {
+    background-color: #FFC300; /* Darker yellow */
+}
+
+table button.delete {
+    background-color: #FF4500; /* Red */
+    color: white;
+}
+
+table button.delete:hover {
+    background-color: #DC143C; /* Darker red */
+}
+
+/* Sticky Footer */
+.sticky-footer {
+    background-color: #388E3C; /* Darker green */
+    color: white;
+    text-align: center;
+    padding: 10px;
+    position: sticky;
+    bottom: 0;
+    width: 100%;
+}
+
+/* Additional Sections for Traceability and Quality Control */
+.traceability-section, .quality-control-section, .affected-products-section {
+    margin: 20px;
+    padding: 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.traceability-section h3, .quality-control-section h3, .affected-products-section h3 {
+    color: #388E3C; /* Darker green */
+    margin-bottom: 20px;
+}
+
+.traceability-section button, .quality-control-section button, .affected-products-section button {
+    padding: 10px 15px;
+    background-color: #4CAF50; /* Green */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.traceability-section button:hover, .quality-control-section button:hover, .affected-products-section button:hover {
+    background-color: #388E3C; /* Darker green */
+ ```css
+}

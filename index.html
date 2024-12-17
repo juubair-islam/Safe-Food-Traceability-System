@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Safe Food Traceability</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Safe Food Traceability System</h1>
+    </header>
+    <main>
+        <form action="php/auth.php" method="POST" id="loginForm">
+            <label for="role">Select Role:</label>
+            <select name="role" id="role" required>
+                <option value="">--Select Role--</option>
+                <option value="Admin">Admin</option>
+                <option value="Processing Unit Manager">Processing Unit Manager</option>
+                <option value="Nutritionist">Nutritionist</option>
+                <option value="Government Officer">Government Officer</option>
+                <option value="Retailer">Retailer</option>
+            </select>
+            <label for="userId">User ID:</label>
+            <input type="text" id="userId" name="userId" required>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+            <button type="submit">Login</button>
+        </form>
+    </main>
+</body>
+</html>
+
