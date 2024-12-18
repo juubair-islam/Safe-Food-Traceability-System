@@ -205,3 +205,30 @@ table button.delete:hover {
     background-color: #388E3C; /* Darker green */
  ```css
 }
+
+
+/* Widgets: Smaller size and styling */
+.small-widget {
+    flex: 1;
+    margin: 10px;
+    padding: 15px;
+    background-color: #f4f4f4;
+    text-align: center;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    max-width: 200px;
+}
+
+/* Chart container adjustments */
+.small-chart {
+    max-width: 400px;
+    margin: 0 auto;
+    height: 300px; /* Adjust chart height */
+}
+
+.chart-container {
+    margin: 20px auto;
+    width: 100%;
+    max-width: 600px;
+    height: 400px;
+}

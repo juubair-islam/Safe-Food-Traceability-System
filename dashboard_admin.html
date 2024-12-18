@@ -5,14 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Safe Food Traceability System</title>
     <link rel="stylesheet" href="css/admin_dashboard.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/jquery.dataTables.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+    <!-- Header -->
     <header class="sticky-header">
         <div class="header-content">
             <img src="images/Logo.png" alt="Farm to Fork Logo" class="logo">
-            <h1>Farm to Fork</h1>
+            <h1>Safe Food Traceability System</h1>
         </div>
         <nav>
             <a href="dashboard_admin.html" class="active">Dashboard</a>
@@ -25,22 +26,29 @@
         </nav>
     </header>
 
+    <!-- Main Content -->
     <main>
-        <section class="widgets">
-            <div class="widget">
+        <!-- Widgets Section -->
+        <section class="widgets" style="display: flex; justify-content: space-around; flex-wrap: wrap;">
+            <div class="widget small-widget">
                 <h3>Total Users</h3>
                 <p id="total-users">Loading...</p>
             </div>
-            <div class="widget">
+            <div class="widget small-widget">
                 <h3>Total Batches</h3>
                 <p id="total-batches">Loading...</p>
             </div>
-            <div class="widget">
+            <div class="widget small-widget">
                 <h3>Quality Checks</h3>
                 <p id="quality-checks">Loading...</p>
             </div>
+            <div class="widget small-widget">
+                <h3>Flagged Batches</h3>
+                <p id="flagged-batches">Loading...</p>
+            </div>
         </section>
 
+        <!-- Charts Section -->
         <section class="charts">
             <div class="chart-container">
                 <h3>Batch Status Overview</h3>
@@ -50,10 +58,15 @@
                 <h3>Waste Management Analysis</h3>
                 <canvas id="wasteManagementChart"></canvas>
             </div>
+            <div class="chart-container small-chart">
+                <h3>Live Temperature and Humidity</h3>
+                <canvas id="temperatureHumidityChart"></canvas>
+            </div>
         </section>
 
+        <!-- User Management Table -->
         <section class="table-section">
-            <h3>Registered Users</h3>
+            <h3>User Management</h3>
             <table id="usersTable" class="display">
                 <thead>
                     <tr>
@@ -62,104 +75,141 @@
                         <th>Email</th>
                         <th>Role</th>
                         <th>Region</th>
+                        <th>Status</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <!-- Data will be dynamically loaded -->
-                </tbody>
+                <tbody></tbody>
             </table>
         </section>
 
-        <section class="traceability-section">
-            <h3>Traceability Control</h3>
-            <button id="trackBatchBtn">Track Batch</button>
-            <div id="traceabilityOutput">Traceability information will be displayed here.</div>
-            <h4>Batch Details</h4>
-            <table id="batchDetailsTable" class="display">
-                <thead>
-                    <tr>
-                        <th>Batch ID</th>
-                        <th>Origin</th>
-                        <th>Variety</th>
-                        <th>Harvest Date</th>
-                        <th>Certifications</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Batch details will be dynamically loaded -->
-                </tbody>
-            </table>
-        </section>
 
-        <section class="quality-control-section">
-            <h3>Quality Control Checks</h3>
-            <button id="viewQualityBtn">View Quality Control Data</button>
-            <div id="qualityOutput">Quality control data will be displayed here.</div>
-        </section>
 
-        <section class="affected-products-section">
-            <h3>Affected Products Management</h3>
-            <button id="manageAffectedBtn">Manage Affected Products</button>
-            <div id="affectedOutput">Affected products data will be displayed here.</div>
+
+
+        
+            <!-- Traceability Control Section -->
+            <section class="table-section">
+                <h3>Traceability Control</h3>
+                <table id="traceabilityTable" class="display">
+                    <thead>
+                        <tr>
+                            <th>Batch ID</th>
+                            <th>Origin</th>
+                            <th>Variety</th>
+                            <th>Harvest Date</th>
+                            <th>Location</th>
+                            <th>Temperature (°C)</th>
+                            <th>Humidity (%)</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Data will be dynamically loaded -->
+                        <!-- Dummy Data Rows -->
+                        <tr>
+                            <td>BATCH-001</td>
+                            <td>Farm A</td>
+                            <td>Organic Carrot</td>
+                            <td>2024-03-15</td>
+                            <td>Cold Storage</td>
+                            <td>22°C</td>
+                            <td>65%</td>
+                            <td>Storable</td>
+                            <td>
+                                <button class="view">View</button>
+                                <button class="track">Track</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>BATCH-002</td>
+                            <td>Farm B</td>
+                            <td>Fresh Lettuce</td>
+                            <td>2024-03-20</td>
+                            <td>Distribution Center</td>
+                            <td>24°C</td>
+                            <td>70%</td>
+                            <td>Non-Storable</td>
+                            <td>
+                                <button class="view">View</button>
+                                <button class="track">Track</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>BATCH-003</td>
+                            <td>Farm C</td>
+                            <td>Tomato</td>
+                            <td>2024-03-10</td>
+                            <td>Retailer</td>
+                            <td>18°C</td>
+                            <td>80%</td>
+                            <td>Damaged</td>
+                            <td>
+                                <button class="view">View</button>
+                                <button class="track">Track</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+    
+    
+    
+
+
+
+
+
+
+        <!-- Reports Section -->
+        <section class="reports-section">
+            <h3>Generate Reports</h3>
+            <button id="generateTraceabilityReport">Traceability Report</button>
+            <button id="generateQualityCheckReport">Quality Check Report</button>
+            <button id="generateFlaggedBatchesReport">Flagged Batches Report</button>
+            <div id="reportOutput">Generated reports will appear here.</div>
         </section>
     </main>
 
+    <!-- Footer -->
     <footer class="sticky-footer">
-        <p>© 2024 Farm to Fork . All Rights Reserved.</p>
+        <p>© 2024 Safe Food Traceability System. All Rights Reserved.</p>
     </footer>
 
+    <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
     <script src="js/admin_dashboard.js"></script>
-    <script>
-        $(document).ready(function() {
-            // Initialize DataTable for users and batch details
-            $('#usersTable').DataTable();
-            $('#batchDetailsTable').DataTable();
-
-            // Load initial data
-            loadDashboardData();
-
-            // Event listeners for buttons
-            $('#trackBatchBtn').click(function() {
-                trackBatch();
-            });
-
-            $('#viewQualityBtn').click(function() {
-                viewQualityControlData();
-            });
-
-            $('#manageAffectedBtn').click(function() {
-                manageAffectedProducts();
-            });
-        });
-
-        function loadDashboardData() {
-            // Simulated data loading
-            $('#total-users').text(100); // Example data
-            $('#total-batches').text(50); // Example data
-            $('#quality-checks').text(30); // Example data
-
-            // Load batch details and other data as needed
-        }
-
-        function trackBatch() {
-            // Simulated batch tracking
-            $('#traceabilityOutput').text('Batch tracking information displayed here.'); // Example output
-            // Load batch details dynamically
-        }
-
-        function viewQualityControlData() {
-            // Simulated quality control data view
-            $('#qualityOutput').text('Quality control data displayed here.'); // Example output
-        }
-
-        function manageAffectedProducts() {
-            // Simulated affected products management
-            $('#affectedOutput').text('Affected products data displayed here.'); // Example output
-        }
-    </script>
 </body>
 </html>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Safe Food Traceability System</title>
+    <link rel="stylesheet" href="css/admin_dashboard.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/jquery.dataTables.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="sticky-header">
+        <div class="header-content">
+            <img src="images/Logo.png" alt="Farm to Fork Logo" class="logo">
+            <h1>Safe Food Traceability System</h1>
+        </div>
+        <nav>
+            <a href="dashboard_admin.html" class="active">Dashboard</a>
+            <a href="manage_users.html">Manage Users</a>
+            <a href="report_generate.html">Generate Reports</a>
+            <a href="traceability_control.html">Traceability Control</a>
+            <a href="waste_management.html">Waste Management</a>
+            <a href="system_control.html">System Control</a>
+            <a href="logout.php">Logout</a>
+        </nav>
+    </header>
+
