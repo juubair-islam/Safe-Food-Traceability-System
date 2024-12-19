@@ -3,31 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Safe Food Traceability</title>
+    <title>Safe Food Traceability System</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+
+    <!-- Header Section -->
     <header>
-        <h1>Safe Food Traceability System</h1>
+        <div class="header-container">
+            <img src="logo.png" alt="Project Logo" class="logo">
+            <h1>Safe Food Traceability System</h1>
+        </div>
     </header>
+
+    <!-- Top Navigation Bar -->
+    <nav>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="admin_dashboard.html">Admin Dashboard</a></li>
+            <li><a href="#">User: Admin</a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
     <main>
-        <form action="php/auth.php" method="POST" id="loginForm">
-            <label for="role">Select Role:</label>
-            <select name="role" id="role" required>
-                <option value="">--Select Role--</option>
-                <option value="Admin">Admin</option>
-                <option value="Processing Unit Manager">Processing Unit Manager</option>
-                <option value="Nutritionist">Nutritionist</option>
-                <option value="Government Officer">Government Officer</option>
-                <option value="Retailer">Retailer</option>
-            </select>
-            <label for="userId">User ID:</label>
-            <input type="text" id="userId" name="userId" required>
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required>
-            <button type="submit">Login</button>
-        </form>
+        <section class="welcome-section">
+            <h2>Welcome to the Admin Dashboard</h2>
+            <p>Here you can manage users, traceability, reporting, and much more.</p>
+        </section>
     </main>
+
+    <!-- Footer Section -->
+    <footer>
+        <p>&copy; 2024 Safe Food Traceability System</p>
+    </footer>
+
 </body>
 </html>
-

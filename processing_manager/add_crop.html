@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Crop</title>
+  <link rel="stylesheet" href="/css/admin_dashboard.css">
+</head>
+<body>
+  <!-- Header Section -->
+  <div class="header">
+    <div class="logo-container">
+      <img src="../images/logo.png" alt="Logo" class="logo">
+      <div class="project-name">
+        <strong>Farm to Fork</strong> <span>Safe Food Traceability System</span>
+      </div>
+    </div>
+    <div class="role">Add Crop</div>
+  </div>
+
+  <!-- Form Content -->
+  <main>
+    <form action="../api/add_crop.php" method="POST">
+      <label for="crop_name">Crop Name:</label>
+      <input type="text" id="crop_name" name="crop_name" required>
+      
+      <label for="quantity">Quantity (kg):</label>
+      <input type="number" id="quantity" name="quantity" required>
+      
+      <label for="harvest_date">Harvest Date:</label>
+      <input type="date" id="harvest_date" name="harvest_date" required>
+      
+      <label for="district">District:</label>
+      <input type="text" id="district" name="district" required>
+      
+      <label for="storage_conditions">Storage Conditions:</label>
+      <input type="text" id="storage_conditions" name="storage_conditions" required>
+      
+      <button type="submit">Add Crop</button>
+    </form>
+  </main>
+
+  <!-- Footer -->
+  <div class="footer">
+    &copy; 2024 Farm to Fork: Safe Food Traceability System. All rights reserved.
+  </div>
+</body>
+</html>

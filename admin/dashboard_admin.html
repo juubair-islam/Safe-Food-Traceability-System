@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Safe Food Traceability System</title>
+  <link rel="stylesheet" href="/css/admin_dashboard.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Include Chart.js -->
+</head>
+<body>
+<!-- Header Section -->
+<div class="header">
+    <div class="logo-container">
+      <img src="../images/logo.png" alt="Logo" class="logo" />
+      <div class="project-name">
+        <strong>Farm to Fork</strong> <span>Safe Food Traceability System</span>
+      </div>
+    </div>
+    <div class="role">Admin Dashboard</div>
+  </div>
+  
+  <!-- Top Navigation Bar -->
+  <div class="top-nav">
+    <div class="nav-links">
+      <ul>
+        <li><a href="dashboard_admin.php" class="active">Dashboard</a></li>
+        <li><a href="manage_users.php">Manage Users</a></li>
+        <li><a href="manage_batches.html" class="active">Manage Batches</a></li>
+        <li><a href="manage_waste.php">Waste Management</a></li>
+        <li><a href="generate_reports.php">Generate Reports</a></li>
+        <li><a href="farmer_management.php">Farmers</a></li>
+        <li><a href="barcode_management.php">Barcodes</a></li>
+        <li><a href="transport_management.php">Transport</a></li>
+        <li><a href="../index.php" class="logout-button">Logout</a></li>
+      </ul>
+    </div>
+  </div>
+  
+  <!-- Main Content -->
+  <main class="dashboard-content">
+    <!-- Summary Cards -->
+    <section class="summary-cards">
+      <div class="card">
+        <h3>Total Crops</h3>
+        <p><?php echo $totalCrops; ?></p>
+      </div>
+      <div class="card">
+        <h3>Available Quantity</h3>
+        <p><?php echo $availableQuantity; ?> kg</p>
+      </div>
+      <div class="card">
+        <h3>Total Users</h3>
+        <p><?php echo $totalUsers; ?></p>
+      </div>
+    </section>
+
+    <!-- Charts Section -->
+    <section>
+      <canvas id="cropsChart"></canvas> <!-- Chart for Crops -->
+      <canvas id="usersChart"></canvas> <!-- Chart for Users -->
+    </section>
+
+    <!-- Recent Activity -->
+    <section class="recent-activity">
+      <h2>Recent Activity</h2>
+      <ul>
+        <?php foreach ($recentActivities as $activity): ?>
+          <li><?php echo htmlspecialchars($activity["activity_description"]); ?> (<?php echo $activity["activity_time"]; ?>)</li>
+        <?php endforeach; ?>
+      </ul>
+    </section>
+  </main>
+  
+  <!-- Footer Section -->
+  <div class="footer">
+    &copy; 2024 Farm to Fork: Safe Food Traceability System. All rights reserved.
+  </div>
+
+  <script>
+    // Fetch data from PHP variables
+    const cropsData = <?php echo json_encode($totalCrops); ?>;
+    const usersData = <?php echo json_encode($totalUsers); ?>;
+
+    // Generate Crops Chart
+    const ctxCrops = document.getElementById('cropsChart').getContext('2d');
+    new Chart(ctxCrops, {
+      type: 'bar',
+      data: {
+        labels: ['Total Crops'],
+        datasets: [{
+          label: 'Crops Count',
+          data: [cropsData],
+          backgroundColor: '#16a085'
+        }]
+      }
+    });
+
+    // Generate Users Chart
+    const ctxUsers = document.getElementById('usersChart').getContext('2d');
+    new Chart(ctxUsers, {
+      type: 'doughnut',
+      data: {
+        labels: ['Total Users'],
+        datasets: [{
+          label: 'Users',
+          data: [usersData],
+          backgroundColor: ['#2980b9', '#16a085']
+        }]
+      }
+    });
+  </script>
+</body>
+</html>

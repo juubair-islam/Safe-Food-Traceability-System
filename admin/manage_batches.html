@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Safe Food Traceability System</title>
+  <link rel="stylesheet" href="/css/admin_dashboard.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Include Chart.js -->
+</head>
+<body>
+<!-- Header Section -->
+<div class="header">
+    <div class="logo-container">
+      <img src="../images/logo.png" alt="Logo" class="logo" />
+      <div class="project-name">
+        <strong>Farm to Fork</strong> <span>Safe Food Traceability System</span>
+      </div>
+    </div>
+    <div class="role">Admin Dashboard</div>
+  </div>
+  
+  <!-- Top Navigation Bar -->
+  <div class="top-nav">
+    <div class="nav-links">
+      <ul>
+        <li><a href="dashboard_admin.php" class="active">Dashboard</a></li>
+        <li><a href="manage_users.php">Manage Users</a></li>
+        <li><a href="manage_batches.html" class="active">Manage Batches</a></li>
+        <li><a href="manage_waste.php">Waste Management</a></li>
+        <li><a href="generate_reports.php">Generate Reports</a></li>
+        <li><a href="farmer_management.php">Farmers</a></li>
+        <li><a href="barcode_management.php">Barcodes</a></li>
+        <li><a href="transport_management.php">Transport</a></li>
+        <li><a href="../index.php" class="logout-button">Logout</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <main class="dashboard-content">
+    <h2>Manage Batches</h2>
+
+    <!-- Add Crop Section -->
+    <div class="add-crop-section">
+      <a href="add_crop.html" class="add-crop-button">Add Crop</a>
+      <input type="text" id="searchInput" placeholder="Search by crop name or batch ID..." class="search-bar">
+      <button onclick="searchBatch()">Search</button>
+    </div>
+
+    <!-- Data Table -->
+    <table class="crop-table">
+      <thead>
+        <tr>
+          <th>Batch ID</th>
+          <th>Crop Name</th>
+          <th>Status</th>
+          <th>Harvest Date</th>
+          <th>Origin</th>
+          <th>Storage Conditions</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="batchData">
+        <!-- PHP Code to Fetch Data from Database -->
+        <?php
+        $conn = new mysqli("localhost", "root", "", "safe_food_traceability");
+
+        if ($conn->connect_error) {
+          die("Connection failed: " . $conn->connect_error);
+        }
+
+        $sql = "SELECT b.batch_id, c.name as crop_name, b.status, b.storage_condition, c.harvest_date, c.origin, b.barcode FROM batches b JOIN crops c ON b.crop_id = c.crop_id";
+        $result = $conn->query($sql);
+
+        if ($result->num_rows > 0) {
+          while($row = $result->fetch_assoc()) {
+            echo "<tr>";
+            echo "<td>" . $row['batch_id'] . "</td>";
+            echo "<td>" . $row['crop_name'] . "</td>";
+            echo "<td>" . $row['status'] . "</td>";
+            echo "<td>" . $row['harvest_date'] . "</td>";
+            echo "<td>" . $row['origin'] . "</td>";
+            echo "<td>" . $row['storage_condition'] . "</td>";
+            echo "<td><a href='edit_batch.php?batch_id=" . $row['batch_id'] . "'>Edit</a> | <a href='delete_batch.php?batch_id=" . $row['batch_id'] . "'>Delete</a></td>";
+            echo "</tr>";
+          }
+        } else {
+          echo "<tr><td colspan='7'>No batches found.</td></tr>";
+        }
+
+        $conn->close();
+        ?>
+      </tbody>
+    </table>
+  </main>
+
+  <!-- Footer -->
+  <div class="footer">
+    &copy; 2024 Farm to Fork: Safe Food Traceability System. All rights reserved.
+  </div>
+</body>
+</html>
