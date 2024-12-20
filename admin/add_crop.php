@@ -96,7 +96,7 @@ if (isset($_POST['farmer_id'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - Safe Food Traceability System</title>
+    <title>Add Crop</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <style>
@@ -446,6 +446,15 @@ body {
     margin-top: 20px;
   }
   
+
+  .error {
+    color: red;
+    font-weight: bold;
+}
+.success {
+    color: green;
+    font-weight: bold;
+}
   </style>
 
 
@@ -469,12 +478,13 @@ body {
   <div class="top-nav">
     <div class="nav-links">
       <ul>
-        <li><a href="dashboard_admin.php" class="active">Dashboard</a></li>
-        <li><a href="manage_users.php">Manage Users</a></li>
-        <li><a href="manage_batches.html" class="active">Manage Batches</a></li>
-        <li><a href="manage_waste.php">Waste Management</a></li>
+      <li><a href="dashboard_admin.php">Dashboard</a></li>
+        <li><a href="http://localhost:3000/Safe-Food-Traceability-System/admin/add_user.php">Manage Users</a></li>
+
+        <li><a href="http://localhost:3000/Safe-Food-Traceability-System/admin/add_crop.php"class="active">Manage Batches</a></li>
+        <li><a href="http://manage_waste.php">Waste Management</a></li>
         <li><a href="generate_reports.php">Generate Reports</a></li>
-        <li><a href="farmer_management.php">Farmers</a></li>
+        <li><a href="http://localhost:3000/Safe-Food-Traceability-System/admin/add_farmer.php">Farmers</a></li>
         <li><a href="barcode_management.php">Barcodes</a></li>
         <li><a href="transport_management.php">Transport</a></li>
         <li><a href="../index.php" class="logout-button">Logout</a></li>
@@ -486,13 +496,19 @@ body {
     <h2>Add Crop</h2>
     <p>Enter crop details to add them to the system.</p>
     
+    <style>
+    .container h2, .container p {
+        margin-bottom: 20px; /* Adjust the value as needed */
+    }
+</style>
     <!-- Success/Error Message -->
     <?php if (!empty($error_message)) : ?>
         <div class="error"><?php echo $error_message; ?></div>
     <?php elseif (!empty($success_message)) : ?>
         <div class="success"><?php echo $success_message; ?></div>
     <?php endif; ?>
-    <div class="form-container">
+
+
     <form method="POST" action="add_crop.php">
         <!-- Batch ID (Read-only, auto-generated) -->
         <div class="form-group">
@@ -527,8 +543,9 @@ body {
             <button type="button" id="check_crop_btn">Show Crop Details</button>
         </div>
 
-        <!-- Display Crop Details -->
-        <div id="cropDetails"></div>
+      <!-- Section to display crop nutrition details -->
+      <div id="cropDetails"></div>
+
 
         <!-- New Batch Date and Nutrition Value -->
         <div class="form-group">
@@ -595,24 +612,27 @@ $('#check_farmer_btn').on('click', function() {
     }
 });
 
-// jQuery to handle AJAX request for checking crop info
+// jQuery to handle the request and display crop nutrition details
 $('#check_crop_btn').on('click', function() {
     var cropName = $('#crop_name').val();
     
     if(cropName != '') {
         $.ajax({
-            url: 'check_crop.php',
+            url: 'check_crop_nutrition.php',  // Path to your nutrition details file
             method: 'POST',
             data: {crop_name: cropName},
             success: function(response) {
-                $('#cropDetails').html(response);
+                $('#cropDetails').html(response);  // Display nutrition info in the cropDetails div
             },
             error: function() {
-                alert('Error retrieving crop details');
+                alert('Error retrieving crop details.');
             }
         });
+    } else {
+        alert('Please select a crop.');
     }
 });
+
 </script>
 
 </body>
