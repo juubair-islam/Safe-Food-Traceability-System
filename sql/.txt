@@ -1,0 +1,266 @@
+CREATE TABLE users (
+    user_id INT(3) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    role ENUM('System Manager', 'Processing Unit Manager', 'Nutritionist', 'Government Officer', 'Distributor', 'Retailer', 'Farmer'),
+    user_id_number VARCHAR(255) UNIQUE,
+    name VARCHAR(100),
+    email VARCHAR(100) UNIQUE,
+    password VARCHAR(255),
+    region VARCHAR(50),
+    region_specific_id VARCHAR(50) UNIQUE,
+    registration_status ENUM('Pending', 'Approved', 'Disapproved') DEFAULT 'Pending',
+    last_login TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status ENUM('Active', 'Inactive') DEFAULT 'Active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+
+CREATE TABLE farmers (
+    farmer_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    district VARCHAR(50) NOT NULL,
+    registration_date DATE NOT NULL
+);
+
+CREATE TABLE crops (
+    crop_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    variety VARCHAR(100),
+    farmer_id INT,
+    harvest_date DATE,
+    origin VARCHAR(100),
+    certifications TEXT,
+    batch_id VARCHAR(50) UNIQUE,
+    FOREIGN KEY (farmer_id) REFERENCES farmers(farmer_id)
+);
+
+CREATE TABLE batches (
+    batch_id VARCHAR(50) PRIMARY KEY,
+    crop_id INT,
+    status ENUM('Storable', 'Non-Storable', 'Damaged') NOT NULL,
+    storage_condition VARCHAR(100),
+    processing_date DATE,
+    barcode VARCHAR(255),
+    FOREIGN KEY (crop_id) REFERENCES crops(crop_id)
+);
+
+CREATE TABLE quality_checks (
+    check_id INT AUTO_INCREMENT PRIMARY KEY,
+    batch_id VARCHAR(50),
+    nutritionist_id INT,
+    inspection_date DATE,
+    results TEXT,
+    certifications TEXT,
+    status ENUM('Pass', 'Fail'),
+    FOREIGN KEY (batch_id) REFERENCES batches(batch_id),
+    FOREIGN KEY (nutritionist_id) REFERENCES users(user_id)
+);
+
+CREATE TABLE transportation (
+    transport_id INT AUTO_INCREMENT PRIMARY KEY,
+    batch_id VARCHAR(50),
+    distributor_id INT,
+    start_location VARCHAR(100),
+    end_location VARCHAR(100),
+    temperature FLOAT,
+    humidity FLOAT,
+    timestamp DATETIME,
+    FOREIGN KEY (batch_id) REFERENCES batches(batch_id),
+    FOREIGN KEY (distributor_id) REFERENCES users(user_id)
+);
+
+CREATE TABLE waste_management (
+    waste_id INT AUTO_INCREMENT PRIMARY KEY,
+    batch_id VARCHAR(50),
+    amount DECIMAL(10,2),
+    processing_date DATE,
+    output_type ENUM('Compost', 'Biogas'),
+    FOREIGN KEY (batch_id) REFERENCES batches(batch_id)
+);
+
+CREATE TABLE retailers (
+    retailer_id INT AUTO_INCREMENT PRIMARY KEY,
+    batch_id VARCHAR(50),
+    received_date DATE,
+    sales_data TEXT,
+    feedback TEXT,
+    FOREIGN KEY (batch_id) REFERENCES batches(batch_id)
+);
+
+
+CREATE TABLE user_activity (
+    activity_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    action VARCHAR(255),
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+
+CREATE TABLE roles_permissions (
+    role ENUM('System Manager', 'Processing Unit Manager', 'Nutritionist', 'Government Officer', 'Distributor', 'Retailer', 'Farmer'),
+    permission VARCHAR(255) -- Permissions for each role
+);
+
+
+CREATE TABLE consumers (
+    consumer_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100),
+    email VARCHAR(100) UNIQUE,
+    phone VARCHAR(20),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE consumer_feedback (
+    feedback_id INT AUTO_INCREMENT PRIMARY KEY,
+    consumer_id INT,
+    batch_id VARCHAR(50),
+    feedback TEXT,
+    rating INT CHECK (rating BETWEEN 1 AND 5),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (consumer_id) REFERENCES consumers(consumer_id),
+    FOREIGN KEY (batch_id) REFERENCES batches(batch_id)
+);
+
+
+
+CREATE TABLE notifications (
+    notification_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    message TEXT,
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+
+
+CREATE TABLE storage_conditions (
+    condition_id INT AUTO_INCREMENT PRIMARY KEY,
+    batch_id VARCHAR(50),
+    temperature FLOAT,
+    humidity FLOAT,
+    timestamp DATETIME,
+    FOREIGN KEY (batch_id) REFERENCES batches(batch_id)
+);
+
+
+
+CREATE TABLE packaging (
+    packaging_id INT AUTO_INCREMENT PRIMARY KEY,
+    batch_id VARCHAR(50),
+    retailer_id INT,
+    return_status ENUM('Returned', 'Not Returned') DEFAULT 'Not Returned',
+    return_date DATE,
+    FOREIGN KEY (batch_id) REFERENCES batches(batch_id),
+    FOREIGN KEY (retailer_id) REFERENCES retailers(retailer_id)
+);
+
+CREATE TABLE statuses (
+    status_id INT AUTO_INCREMENT PRIMARY KEY,
+    status_name VARCHAR(50) UNIQUE NOT NULL
+);
+
+-- Insert Statuses
+INSERT INTO statuses (status_name) VALUES ('Pending'), ('Approved'), ('Disapproved'), ('Pass'), ('Fail'), ('Returned'), ('Not Returned');
+
+-- Example Update
+ALTER TABLE users ADD COLUMN registration_status_id INT, ADD FOREIGN KEY (registration_status_id) REFERENCES statuses(status_id);
+
+
+CREATE INDEX idx_users_email ON users (email);
+CREATE INDEX idx_batches_batch_id ON batches (batch_id);
+
+
+CREATE TABLE audit_logs (
+    log_id INT AUTO_INCREMENT PRIMARY KEY,
+    table_name VARCHAR(100),
+    action VARCHAR(50),
+    user_id INT,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    details TEXT,
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+
+CREATE TABLE certifications (
+    certification_id INT AUTO_INCREMENT PRIMARY KEY,
+    crop_id INT,
+    certification_name VARCHAR(100),
+    issue_date DATE,
+    expiry_date DATE,
+    FOREIGN KEY (crop_id) REFERENCES crops(crop_id)
+);
+
+
+
+CREATE TABLE roles_permissions (
+    role ENUM('System Manager', 'Processing Unit Manager', 'Nutritionist', 'Government Officer', 'Distributor', 'Retailer', 'Farmer'),
+    permission VARCHAR(255),
+    PRIMARY KEY (role, permission)
+);
+
+CREATE TABLE audit_logs (
+    log_id INT AUTO_INCREMENT PRIMARY KEY,
+    table_name VARCHAR(100) NOT NULL,
+    action VARCHAR(50) NOT NULL,
+    user_id INT,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    details TEXT,
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+ALTER TABLE users 
+ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
+
+ALTER TABLE batches 
+ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
+
+
+
+
+ALTER TABLE waste_management 
+    ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+ALTER TABLE waste_management ADD COLUMN revenue_generated DECIMAL(10,2) DEFAULT 0.00;
+
+
+ALTER TABLE batches 
+    ADD COLUMN location VARCHAR(255), 
+    ADD COLUMN quality_check_status ENUM('Pass', 'Fail', 'Pending') DEFAULT 'Pending', 
+    ADD COLUMN flagged ENUM('Yes', 'No') DEFAULT 'No';
+
+
+ALTER TABLE retailers ADD COLUMN retailer_user_id INT, ADD FOREIGN KEY (retailer_user_id) REFERENCES users(user_id);
+
+ALTER TABLE transportation 
+ADD FOREIGN KEY (distributor_id) REFERENCES users(user_id);
+
+ALTER TABLE farmers ADD COLUMN user_id INT, ADD FOREIGN KEY (user_id) REFERENCES users(user_id);
+
+ALTER TABLE notifications ADD COLUMN priority ENUM('Low', 'Medium', 'High') DEFAULT 'Low';
+
+
+
+ALTER TABLE packaging 
+ADD COLUMN bag_type VARCHAR(50),
+ADD COLUMN revenue_from_return DECIMAL(10,2) DEFAULT 0.00;
+
+
+ALTER TABLE consumers ADD COLUMN address VARCHAR(255);
+
+ALTER TABLE storage_conditions ADD COLUMN remarks TEXT;
+
+DROP TABLE IF EXISTS roles_permissions;
+
+CREATE TABLE roles_permissions (
+    role ENUM('System Manager', 'Processing Unit Manager', 'Nutritionist', 'Government Officer', 'Distributor', 'Retailer', 'Farmer'),
+    permission VARCHAR(255),
+    PRIMARY KEY (role, permission)
+);
+
+ALTER TABLE users MODIFY role ENUM('admin', 'user') DEFAULT 'user';
+ALTER TABLE users CHANGE user_id user_id INT(3) UNSIGNED AUTO_INCREMENT PRIMARY KEY;
+
+
+
