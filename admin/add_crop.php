@@ -49,34 +49,40 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (!$farmer_exists) {
         $error_message = "The Farmer info is Not In The Database.";
     } else {
-        // Generate Batch ID
-        $batch_query = "SELECT MAX(batch_id) AS latest_batch_id FROM batches";
-        $batch_result = $pdo->query($batch_query);
-        $batch_data = $batch_result->fetch(PDO::FETCH_ASSOC);
-        $latest_batch_id = $batch_data['latest_batch_id'];
+        try {
+            // Start a transaction
+            $pdo->beginTransaction();
 
-        // Make sure to cast the numeric part of the batch_id to an integer
-        $latest_batch_number = (int) substr($latest_batch_id, 6); // Get numeric part and cast to integer
-        $batch_id = 'BATCH-' . ($latest_batch_number + 1); // Add 1 to the integer part and concatenate it with the prefix
+            // Insert into crops table
+            $insert_crop_query = "INSERT INTO crops (name, farmer_id, harvest_area, quantity, harvest_date) 
+                                  VALUES (?, ?, ?, ?, ?)";
+            $stmt = $pdo->prepare($insert_crop_query);
+            $stmt->execute([$crop_name, $farmer_id, $harvest_area, $quantity, $harvest_date]);
 
+            // Get crop_id of the inserted crop
+            $crop_id = $pdo->lastInsertId();
 
-        // Insert into crops table
-        $insert_crop_query = "INSERT INTO crops (name, farmer_id, harvest_area, quantity, harvest_date) 
-                              VALUES (?, ?, ?, ?, ?)";
-        $stmt = $pdo->prepare($insert_crop_query);
-        $stmt->execute([$crop_name, $farmer_id, $harvest_area, $quantity, $harvest_date]);
+            // Insert into batches table (with auto-increment batch_id)
+            $nutrition_value_certification = "Nutrition Value Checked: " . date('Y-m-d H:i:s');
+            $insert_batch_query = "INSERT INTO batches (crop_id, status, certifications, quality_check_status, batch_date, nutrition_value) 
+                                   VALUES (?, 'Storable', ?, 'Pass', ?, ?)";
+            $stmt = $pdo->prepare($insert_batch_query);
+            $stmt->execute([$crop_id, $nutrition_value_certification, $batch_date, $nutrition_value]);
 
-        // Get crop_id of the inserted crop
-        $crop_id = $pdo->lastInsertId();
+            // Get the auto-generated batch ID
+            $batch_id = $pdo->lastInsertId();
 
-        // Insert into batches table (with initial certification and nutrition value)
-        $nutrition_value_certification = "Nutrition Value Checked: " . date('Y-m-d H:i:s');
-        $insert_batch_query = "INSERT INTO batches (batch_id, crop_id, status, certifications, quality_check_status, batch_date, nutrition_value) 
-                               VALUES (?, ?, 'Storable', ?, 'Pass', ?, ?)";
-        $stmt = $pdo->prepare($insert_batch_query);
-        $stmt->execute([$batch_id, $crop_id, $nutrition_value_certification, $batch_date, $nutrition_value]);
+            // Commit the transaction
+            $pdo->commit();
 
-        $success_message = "Crop added successfully with Batch ID: $batch_id";
+            $success_message = "Crop added successfully with Batch ID: $batch_id";
+        } catch (PDOException $e) {
+            // Roll back the transaction if an error occurs
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            $error_message = "An error occurred while adding the crop: " . $e->getMessage();
+        }
     }
 }
 
@@ -89,6 +95,8 @@ if (isset($_POST['farmer_id'])) {
     $farmer_details = $stmt->fetch(PDO::FETCH_ASSOC);
 }
 ?>
+
+
 
 
 <!DOCTYPE html>
