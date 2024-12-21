@@ -672,15 +672,15 @@ body {
   <div class="top-nav">
     <div class="nav-links">
       <ul>
-        <li><a href="dashboard_admin.php">Dashboard</a></li>
-        <li><a href="http://localhost:3000/Safe-Food-Traceability-System/admin/add_user.php"class="active">Manage Users</a></li>
-        <li><a href="http://localhost:3000/Safe-Food-Traceability-System/admin/add_crop.php">Manage Batches</a></li>
-        <li><a href="http://manage_waste.php">Waste Management</a></li>
-        <li><a href="generate_reports.php">Generate Reports</a></li>
-        <li><a href="http://localhost:3000/Safe-Food-Traceability-System/admin/add_farmer.php">Farmers</a></li>
-        <li><a href="barcode_management.php">Barcodes</a></li>
-        <li><a href="transport_management.php">Transport</a></li>
-        <li><a href="../index.php" class="logout-button">Logout</a></li>
+      <li><a href="http://localhost:3000/Safe-Food-Traceability-System/admin/admin_dashboard.php">Dashboard</a></li>
+        <li><a href="http://localhost:3000/Safe-Food-Traceability-System/admin/view_users.php"class="active">Manage Users</a></li>
+        <li><a href="http://localhost:3000/Safe-Food-Traceability-System/admin/view_farmer.php">Farmer Details</a></li>
+        <li><a href="http://localhost:3000/Safe-Food-Traceability-System/admin/view_crop.php">Manage Batches</a></li>
+        <li><a href="http://localhost:3000/Safe-Food-Traceability-System/admin/view_retailer.php">Retailer</a></li>
+        <li><a href="http://localhost:3000/Safe-Food-Traceability-System/admin/waste_management.php">Waste Management</a></li>
+        <li><a href="http://localhost:3000/Safe-Food-Traceability-System/admin/nutrition_crop.php">Crop Nutritionist</a></li>
+        <li><a href="http://localhost:3000/Safe-Food-Traceability-System/admin/cold_storage.php">Cold Storage</a></li>
+        <li><a href="http://localhost:3000/Safe-Food-Traceability-System/admin/login.php" class="logout-button">Logout</a></li>
       </ul>
       </ul>
     </div>

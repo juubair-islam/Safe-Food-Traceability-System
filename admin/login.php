@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Check for admin credentials
     if ($role == 'admin' && $email == '2221134@iub.edu.bd' && $input_password == '12345') {
         // If the admin credentials match, redirect to the admin dashboard
-        header("Location: http://localhost:3000/Safe-Food-Traceability-System/admin/dashboard.php");
+        header("Location: http://localhost:3000/Safe-Food-Traceability-System/admin/admin_dashboard.php");
         exit();
     } else {
         // Query to check if the user exists in the 'users' table with the selected role
@@ -80,12 +80,13 @@ $conn->close();
         /* Logo and Title Section */
         .logo-section {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 10px;
         }
 
         .logo-section img {
             width: 80px; /* Adjust logo size */
             margin-bottom: 10px;
+            background: transparent;
         }
 
         .logo-section h1 {
@@ -100,7 +101,7 @@ $conn->close();
 
         /* Login Form Styling */
         .login-container {
-            background-color: white;
+            background-color: White;
             padding: 30px;
             border-radius: 8px;
             box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
@@ -169,7 +170,7 @@ $conn->close();
 
     <!-- Logo and Title Section -->
     <div class="logo-section">
-        <img src="logo.png" alt="Logo"> <!-- Add your logo here -->
+    <img src="../images/logo.png" alt="Logo" class="logo" />
         <h1>Safe Food Traceability System</h1>
         <h3>Farm To Fork</h3>
     </div>

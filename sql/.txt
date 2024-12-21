@@ -1,3 +1,10 @@
+CREATE TABLE statuses (
+    status_id INT AUTO_INCREMENT PRIMARY KEY,
+    status_name VARCHAR(50) UNIQUE NOT NULL
+);
+
+INSERT INTO statuses (status_name) VALUES ('Pending'), ('Approved'), ('Disapproved'), ('Pass'), ('Fail'), ('Returned'), ('Not Returned');
+
 CREATE TABLE users (
     user_id INT(3) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     role ENUM('System Manager', 'Processing Unit Manager', 'Nutritionist', 'Government Officer', 'Distributor', 'Retailer', 'Farmer'),
@@ -7,20 +14,18 @@ CREATE TABLE users (
     password VARCHAR(255),
     region VARCHAR(50),
     region_specific_id VARCHAR(50) UNIQUE,
-    registration_status ENUM('Pending', 'Approved', 'Disapproved') DEFAULT 'Pending',
+    registration_status_id INT,
     last_login TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     status ENUM('Active', 'Inactive') DEFAULT 'Active',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (registration_status_id) REFERENCES statuses(status_id)
 );
 
 
 
-CREATE TABLE farmers (
-    farmer_id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    district VARCHAR(50) NOT NULL,
-    registration_date DATE NOT NULL
-);
+
+
 
 CREATE TABLE crops (
     crop_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -41,13 +46,17 @@ CREATE TABLE batches (
     storage_condition VARCHAR(100),
     processing_date DATE,
     barcode VARCHAR(255),
+    location VARCHAR(255),
+    quality_check_status ENUM('Pass', 'Fail', 'Pending') DEFAULT 'Pending',
+    flagged ENUM('Yes', 'No') DEFAULT 'No',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (crop_id) REFERENCES crops(crop_id)
 );
 
 CREATE TABLE quality_checks (
     check_id INT AUTO_INCREMENT PRIMARY KEY,
     batch_id VARCHAR(50),
-    nutritionist_id INT,
+    nutritionist_id INT UNSIGNED,  -- Make sure this matches the 'user_id' type
     inspection_date DATE,
     results TEXT,
     certifications TEXT,
@@ -56,18 +65,20 @@ CREATE TABLE quality_checks (
     FOREIGN KEY (nutritionist_id) REFERENCES users(user_id)
 );
 
+
 CREATE TABLE transportation (
     transport_id INT AUTO_INCREMENT PRIMARY KEY,
     batch_id VARCHAR(50),
-    distributor_id INT,
+    distributor_id INT UNSIGNED,  -- Ensure this is the same type as user_id
     start_location VARCHAR(100),
     end_location VARCHAR(100),
     temperature FLOAT,
     humidity FLOAT,
     timestamp DATETIME,
     FOREIGN KEY (batch_id) REFERENCES batches(batch_id),
-    FOREIGN KEY (distributor_id) REFERENCES users(user_id)
+    FOREIGN KEY (distributor_id) REFERENCES users(user_id)  -- Make sure user_id is INT UNSIGNED
 );
+
 
 CREATE TABLE waste_management (
     waste_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -75,8 +86,12 @@ CREATE TABLE waste_management (
     amount DECIMAL(10,2),
     processing_date DATE,
     output_type ENUM('Compost', 'Biogas'),
+    revenue_generated DECIMAL(10,2) DEFAULT 0.00,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (batch_id) REFERENCES batches(batch_id)
 );
+
+
 
 CREATE TABLE retailers (
     retailer_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -84,13 +99,15 @@ CREATE TABLE retailers (
     received_date DATE,
     sales_data TEXT,
     feedback TEXT,
-    FOREIGN KEY (batch_id) REFERENCES batches(batch_id)
+    retailer_user_id INT UNSIGNED,  -- Matching the type of user_id
+    FOREIGN KEY (batch_id) REFERENCES batches(batch_id),
+    FOREIGN KEY (retailer_user_id) REFERENCES users(user_id)
 );
 
 
 CREATE TABLE user_activity (
     activity_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
+    user_id INT UNSIGNED,  -- Ensure the type matches user_id in users
     action VARCHAR(255),
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(user_id)
@@ -99,8 +116,12 @@ CREATE TABLE user_activity (
 
 CREATE TABLE roles_permissions (
     role ENUM('System Manager', 'Processing Unit Manager', 'Nutritionist', 'Government Officer', 'Distributor', 'Retailer', 'Farmer'),
-    permission VARCHAR(255) -- Permissions for each role
+    permission VARCHAR(255),
+    PRIMARY KEY (role, permission)
 );
+
+
+
 
 
 CREATE TABLE consumers (
@@ -108,8 +129,11 @@ CREATE TABLE consumers (
     name VARCHAR(100),
     email VARCHAR(100) UNIQUE,
     phone VARCHAR(20),
+    address VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+
 
 
 CREATE TABLE consumer_feedback (
@@ -125,11 +149,13 @@ CREATE TABLE consumer_feedback (
 
 
 
+
 CREATE TABLE notifications (
     notification_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT,
+    user_id INT UNSIGNED,  -- Ensure this matches the type in users table
     message TEXT,
     is_read BOOLEAN DEFAULT FALSE,
+    priority ENUM('Low', 'Medium', 'High') DEFAULT 'Low',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
@@ -142,8 +168,10 @@ CREATE TABLE storage_conditions (
     temperature FLOAT,
     humidity FLOAT,
     timestamp DATETIME,
+    remarks TEXT,
     FOREIGN KEY (batch_id) REFERENCES batches(batch_id)
 );
+
 
 
 
@@ -153,35 +181,24 @@ CREATE TABLE packaging (
     retailer_id INT,
     return_status ENUM('Returned', 'Not Returned') DEFAULT 'Not Returned',
     return_date DATE,
+    bag_type VARCHAR(50),
+    revenue_from_return DECIMAL(10,2) DEFAULT 0.00,
     FOREIGN KEY (batch_id) REFERENCES batches(batch_id),
     FOREIGN KEY (retailer_id) REFERENCES retailers(retailer_id)
 );
 
-CREATE TABLE statuses (
-    status_id INT AUTO_INCREMENT PRIMARY KEY,
-    status_name VARCHAR(50) UNIQUE NOT NULL
-);
-
--- Insert Statuses
-INSERT INTO statuses (status_name) VALUES ('Pending'), ('Approved'), ('Disapproved'), ('Pass'), ('Fail'), ('Returned'), ('Not Returned');
-
--- Example Update
-ALTER TABLE users ADD COLUMN registration_status_id INT, ADD FOREIGN KEY (registration_status_id) REFERENCES statuses(status_id);
-
-
-CREATE INDEX idx_users_email ON users (email);
-CREATE INDEX idx_batches_batch_id ON batches (batch_id);
 
 
 CREATE TABLE audit_logs (
     log_id INT AUTO_INCREMENT PRIMARY KEY,
-    table_name VARCHAR(100),
-    action VARCHAR(50),
-    user_id INT,
+    table_name VARCHAR(100) NOT NULL,
+    action VARCHAR(50) NOT NULL,
+    user_id INT UNSIGNED,  -- Ensure this matches the type in users table
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     details TEXT,
     FOREIGN KEY (user_id) REFERENCES users(user_id)
-);
+);amer
+
 
 
 CREATE TABLE certifications (
@@ -193,74 +210,115 @@ CREATE TABLE certifications (
     FOREIGN KEY (crop_id) REFERENCES crops(crop_id)
 );
 
+ALTER TABLE users MODIFY COLUMN role VARCHAR(100);
+
+ALTER TABLE farmers 
+ADD COLUMN contact_number VARCHAR(15) NOT NULL,
+ADD COLUMN nid_number VARCHAR(20) NOT NULL,
+ADD COLUMN fathers_name VARCHAR(100) NOT NULL,
+ADD COLUMN mothers_name VARCHAR(100) NOT NULL;
 
 
-CREATE TABLE roles_permissions (
-    role ENUM('System Manager', 'Processing Unit Manager', 'Nutritionist', 'Government Officer', 'Distributor', 'Retailer', 'Farmer'),
-    permission VARCHAR(255),
-    PRIMARY KEY (role, permission)
-);
+ALTER TABLE crops
+    DROP COLUMN variety,
+    DROP COLUMN origin,
+    ADD COLUMN harvest_area DECIMAL(10, 2),
+    ADD COLUMN quantity DECIMAL(10, 2);
 
-CREATE TABLE audit_logs (
-    log_id INT AUTO_INCREMENT PRIMARY KEY,
-    table_name VARCHAR(100) NOT NULL,
-    action VARCHAR(50) NOT NULL,
-    user_id INT,
-    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    details TEXT,
-    FOREIGN KEY (user_id) REFERENCES users(user_id)
-);
+ALTER TABLE crops ADD COLUMN harvest_district VARCHAR(100);
 
-ALTER TABLE users 
-ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
-
-ALTER TABLE batches 
-ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
+ALTER TABLE nutrition_crop ADD certification_date DATE;
 
 
+ALTER TABLE nutrition_crop 
+ADD COLUMN nutrition_value_day_1_3 DECIMAL(5,2) NOT NULL,
+ADD COLUMN nutrition_value_day_3_5 DECIMAL(5,2) NOT NULL,
+ADD COLUMN nutrition_value_day_5_7 DECIMAL(5,2) NOT NULL,
+ADD COLUMN nutrition_value_day_7_10 DECIMAL(5,2) NOT NULL,
+ADD COLUMN nutrition_value_day_10_15 DECIMAL(5,2) NOT NULL,
+ADD COLUMN nutrition_value_day_15_plus DECIMAL(5,2) NOT NULL,
+ADD COLUMN nutrition_value_custom TEXT;
 
 
-ALTER TABLE waste_management 
-    ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
-ALTER TABLE waste_management ADD COLUMN revenue_generated DECIMAL(10,2) DEFAULT 0.00;
-
-
-ALTER TABLE batches 
-    ADD COLUMN location VARCHAR(255), 
-    ADD COLUMN quality_check_status ENUM('Pass', 'Fail', 'Pending') DEFAULT 'Pending', 
-    ADD COLUMN flagged ENUM('Yes', 'No') DEFAULT 'No';
-
-
-ALTER TABLE retailers ADD COLUMN retailer_user_id INT, ADD FOREIGN KEY (retailer_user_id) REFERENCES users(user_id);
-
-ALTER TABLE transportation 
-ADD FOREIGN KEY (distributor_id) REFERENCES users(user_id);
-
-ALTER TABLE farmers ADD COLUMN user_id INT, ADD FOREIGN KEY (user_id) REFERENCES users(user_id);
-
-ALTER TABLE notifications ADD COLUMN priority ENUM('Low', 'Medium', 'High') DEFAULT 'Low';
+ALTER TABLE nutrition_crop
+DROP COLUMN nutrition_value,
+DROP COLUMN best_nutrition_value,
+DROP COLUMN use_before,
+DROP COLUMN certification_date;
 
 
 
-ALTER TABLE packaging 
-ADD COLUMN bag_type VARCHAR(50),
-ADD COLUMN revenue_from_return DECIMAL(10,2) DEFAULT 0.00;
+ALTER TABLE batches
+ADD COLUMN certifications TEXT;
+
+ALTER TABLE crops
+ADD COLUMN batch_date DATE;
+
+ALTER TABLE batches
+ADD COLUMN batch_date DATE,
+ADD COLUMN nutrition_value DECIMAL(5, 2);
+
+SELECT * FROM crops WHERE batch_id = '';
+SELECT * FROM batches WHERE batch_id = '';
+
+DELETE FROM crops WHERE batch_id = '';
+DELETE FROM batches WHERE batch_id = '';
 
 
-ALTER TABLE consumers ADD COLUMN address VARCHAR(255);
+ALTER TABLE crops ADD COLUMN harvest_area_size DECIMAL(10, 2) NOT NULL;
 
-ALTER TABLE storage_conditions ADD COLUMN remarks TEXT;
 
-DROP TABLE IF EXISTS roles_permissions;
+ALTER TABLE users
+ADD COLUMN contact_number VARCHAR(15) NULL;
 
-CREATE TABLE roles_permissions (
-    role ENUM('System Manager', 'Processing Unit Manager', 'Nutritionist', 'Government Officer', 'Distributor', 'Retailer', 'Farmer'),
-    permission VARCHAR(255),
-    PRIMARY KEY (role, permission)
-);
 
-ALTER TABLE users MODIFY role ENUM('admin', 'user') DEFAULT 'user';
-ALTER TABLE users CHANGE user_id user_id INT(3) UNSIGNED AUTO_INCREMENT PRIMARY KEY;
+ALTER TABLE users
+DROP COLUMN user_id_number,
+DROP COLUMN region_specific_id,
+ALTER TABLE users MODIFY password VARCHAR(255);
+
+
+ALTER TABLE retailer
+ADD COLUMN retailer_name VARCHAR(255) NOT NULL,
+ADD COLUMN retailer_contact_number VARCHAR(20) NOT NULL,
+ADD COLUMN retailer_email VARCHAR(100) NOT NULL,
+ADD COLUMN batch_received_quantity INT NOT NULL,
+ADD COLUMN batch_return_quantity INT NOT NULL,
+ADD COLUMN received_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN return_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+
+
+ALTER TABLE retailer
+DROP COLUMN sales_data,
+DROP COLUMN feedback;
+
+
+ALTER TABLE retailers
+ADD COLUMN district VARCHAR(255) NOT NULL AFTER retailer_email;
+ALTER TABLE retailers
+ADD COLUMN shop_location VARCHAR(255) NOT NULL AFTER retailer_email;
+
+ALTER TABLE retailers
+ADD COLUMN status ENUM('Active', 'Inactive') DEFAULT 'Active';
+
+
+
+ALTER TABLE batches
+DROP COLUMN storage_condition;
+
+ALTER TABLE batches
+MODIFY COLUMN status ENUM('Storable', 'Non-Storable', 'Damaged', 'Retailer', 'Cold Storage') NOT NULL;
+
+
+ALTER TABLE batches
+CHANGE status status ENUM('Storable', 'Non-Storable', 'Damaged', 'Cold Storage', 'Released from Cold Storage') NOT NULL;
+
+
+
+SELECT name AS crop_name, SUM(harvest_area_size) AS total_area_size
+FROM crops
+GROUP BY name
+ORDER BY total_area_size DESC;
 
 
 
