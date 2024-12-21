@@ -1,50 +1,102 @@
 <?php
 // Database connection
 $host = 'localhost';
-$dbname = 'safe_food_traceability';
 $username = 'root';
 $password = '';
+$dbname = 'safe_food_traceability';
+$conn = new mysqli($host, $username, $password, $dbname);
 
-try {
-    // Create a PDO instance and connect to the database
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
-    // Set the PDO error mode to exception
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    die("Database connection failed: " . $e->getMessage());
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }
 
-$success_message = '';
-$error_message = '';
+// Initialize variables and messages
+$error_msg_batch = '';
+$success_msg_batch = '';
+$success_msg_submit = '';
+$batch_id = '';
+$batch_status = '';
+$storage_condition = '';
+$batch_date = '';
+$crop_name = '';
+$quantity = 0;
+$returned_amount = 0;
+$retailer_id = '';
+$error_msg_retailer = '';
+$success_msg_retailer = '';
+$retailer_name = '';
+$retailer_contact = '';
+$retailer_location = '';
 
-// Fetch existing waste batches from the database
-$waste_query = "SELECT wm.*, u.name AS retailer_name 
-                FROM waste_management wm
-                LEFT JOIN retailers r ON wm.retailer_id = r.retailer_id
-                LEFT JOIN users u ON r.retailer_user_id = u.user_id";  // Join retailers with users to get retailer name
-$waste_result = $pdo->query($waste_query);
-$waste_batches = $waste_result->fetchAll(PDO::FETCH_ASSOC);
-
-// Handle form submission for waste management
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $batch_id = $_POST['batch_id'];
+// Handle retailer search
+if (isset($_POST['search_retailer'])) {
     $retailer_id = $_POST['retailer_id'];
-    $return_status = $_POST['return_status'];
-    $return_date = $_POST['return_date'];
-    $bag_type = $_POST['bag_type'];
-    $revenue_from_return = $_POST['revenue_from_return'];
+    $retailer_query = "SELECT retailer_name, retailer_contact_number, shop_location FROM retailers WHERE retailer_id = ?";
+    $stmt = $conn->prepare($retailer_query);
+    $stmt->bind_param('i', $retailer_id);
+    $stmt->execute();
+    $stmt->store_result();
 
-    try {
-        // Insert into the waste_management table
-        $insert_waste_query = "INSERT INTO waste_management (batch_id, retailer_id, return_status, return_date, bag_type, revenue_from_return) 
-                               VALUES (?, ?, ?, ?, ?, ?)";
-        $stmt = $pdo->prepare($insert_waste_query);
-        $stmt->execute([$batch_id, $retailer_id, $return_status, $return_date, $bag_type, $revenue_from_return]);
-
-        $success_message = "Waste batch added successfully!";
-    } catch (PDOException $e) {
-        $error_message = "An error occurred while adding the waste batch: " . $e->getMessage();
+    if ($stmt->num_rows > 0) {
+        $stmt->bind_result($retailer_name, $retailer_contact, $retailer_location);
+        $stmt->fetch();
+        $success_msg_retailer = "Retailer data loaded successfully!";
+    } else {
+        $error_msg_retailer = "Retailer does not exist.";
     }
+    $stmt->close();
+}
+
+// Handle batch search
+if (isset($_POST['search_batch'])) {
+    $batch_id = $_POST['batch_id'];
+    $batch_query = "
+        SELECT b.status, b.storage_condition, b.batch_date, c.name AS crop_name, c.quantity
+        FROM batches b
+        LEFT JOIN crops c ON b.batch_id = c.batch_id
+        WHERE b.batch_id = ?";
+    $stmt = $conn->prepare($batch_query);
+    $stmt->bind_param('s', $batch_id);
+    $stmt->execute();
+    $stmt->store_result();
+
+    if ($stmt->num_rows > 0) {
+        $stmt->bind_result($batch_status, $storage_condition, $batch_date, $crop_name, $quantity);
+        $stmt->fetch();
+        $success_msg_batch = "Batch data loaded successfully!";
+    } else {
+        $error_msg_batch = "Batch does not exist.";
+    }
+    $stmt->close();
+}
+
+// Handle form submission
+if (isset($_POST['submit_waste'])) {
+    $batch_id = $_POST['batch_id'];
+    $returned_amount = $_POST['returned_amount'];
+    $processing_date = date("Y-m-d");
+    $retailer_id = $_POST['retailer_id'];
+
+    // Add entry to waste_management table
+    $waste_query = "INSERT INTO waste_management (batch_id, amount, processing_date) VALUES (?, ?, ?)";
+    $stmt = $conn->prepare($waste_query);
+    $stmt->bind_param('sds', $batch_id, $returned_amount, $processing_date);
+    if ($stmt->execute()) {
+        // Update batches table to mark status as 'Damaged'
+        $update_batch_query = "UPDATE batches SET status = 'Damaged', updated_at = NOW() WHERE batch_id = ?";
+        $update_stmt = $conn->prepare($update_batch_query);
+        $update_stmt->bind_param('s', $batch_id);
+        if ($update_stmt->execute()) {
+            $success_msg_submit = "Waste processing completed successfully!";
+        } else {
+            $error_msg_batch = "Failed to update batch status.";
+        }
+        $update_stmt->close();
+    } else {
+        $error_msg_batch = "Failed to add entry to waste management.";
+    }
+    $stmt->close();
 }
 ?>
 
@@ -54,101 +106,182 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Waste Management</title>
-    <link rel="stylesheet" href="styles.css"> <!-- Ensure you have a proper style.css linked -->
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 20px;
+        }
+
+        header .header-title h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        nav ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        nav ul li {
+            float: left;
+        }
+
+        nav ul li a {
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+        }
+
+        nav ul li a.active, nav ul li a:hover {
+            background-color: #45a049;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 30px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-field {
+            margin-bottom: 15px;
+        }
+
+        .form-field label {
+            display: block;
+            font-weight: bold;
+        }
+
+        .form-field input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .form-field button {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .form-field button:hover {
+            background-color: #45a049;
+        }
+
+        .error {
+            color: red;
+            margin-bottom: 10px;
+        }
+
+        .success {
+            color: green;
+            margin-bottom: 10px;
+        }
+
+        .footer-content {
+            text-align: center;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+        }
+    </style>
 </head>
 <body>
+    <header>
+        <div class="header-title">
+            <h1>Safe Food Traceability System</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="dashboard.php">Dashboard</a></li>
+                <li><a href="crops.php">Crops</a></li>
+                <li><a href="batches.php">Batches</a></li>
+                <li><a href="waste.php" class="active">Waste Management</a></li>
+            </ul>
+        </nav>
+    </header>
+    
     <div class="container">
-        <h2>Manage Waste Batches</h2>
+        <h2>Waste Management</h2>
+        <form method="POST">
+            <!-- Retailer Section -->
+            <div class="form-field">
+                <label for="retailer_id">Retailer ID</label>
+                <input type="text" id="retailer_id" name="retailer_id" value="<?php echo $retailer_id; ?>" placeholder="Enter Retailer ID">
+            </div>
+            <div class="form-field">
+                <button type="submit" name="search_retailer">Search Retailer</button>
+            </div>
+            <?php if ($error_msg_retailer): ?>
+                <div class="error"><?php echo $error_msg_retailer; ?></div>
+            <?php elseif ($success_msg_retailer): ?>
+                <div class="success"><?php echo $success_msg_retailer; ?></div>
+                <div class="result">
+                    <p><strong>Retailer Name:</strong> <?php echo $retailer_name; ?></p>
+                    <p><strong>Contact Number:</strong> <?php echo $retailer_contact; ?></p>
+                    <p><strong>Shop Location:</strong> <?php echo $retailer_location; ?></p>
+                </div>
+            <?php endif; ?>
 
-        <!-- Display success or error message -->
-        <?php if ($success_message) : ?>
-            <div class="alert alert-success"><?php echo $success_message; ?></div>
-        <?php endif; ?>
-        <?php if ($error_message) : ?>
-            <div class="alert alert-danger"><?php echo $error_message; ?></div>
-        <?php endif; ?>
+            <!-- Batch Section -->
+            <div class="form-field">
+                <label for="batch_id">Batch ID</label>
+                <input type="text" id="batch_id" name="batch_id" value="<?php echo $batch_id; ?>" placeholder="Enter Batch ID">
+            </div>
+            <div class="form-field">
+                <button type="submit" name="search_batch">Search Batch</button>
+            </div>
+            <?php if ($error_msg_batch): ?>
+                <div class="error"><?php echo $error_msg_batch; ?></div>
+            <?php elseif ($success_msg_batch): ?>
+                <div class="success"><?php echo $success_msg_batch; ?></div>
+                <div class="result">
+                    <p><strong>Status:</strong> <?php echo $batch_status; ?></p>
+                    <p><strong>Storage Condition:</strong> <?php echo $storage_condition; ?></p>
+                    <p><strong>Batch Date:</strong> <?php echo $batch_date; ?></p>
+                    <p><strong>Crop Name:</strong> <?php echo $crop_name; ?></p>
+                    <p><strong>Quantity:</strong> <?php echo $quantity; ?></p>
+                </div>
+            <?php endif; ?>
 
-        <!-- Add Waste Batch Form -->
-        <form method="POST" action="">
-            <div class="form-group">
-                <label for="batch_id">Batch ID:</label>
-                <input type="text" name="batch_id" id="batch_id" required>
+            <!-- Waste Management Section -->
+            <div class="form-field">
+                <label for="returned_amount">Returned Amount</label>
+                <input type="number" id="returned_amount" name="returned_amount" value="<?php echo $returned_amount; ?>" placeholder="Enter Returned Amount">
             </div>
-            <div class="form-group">
-                <label for="retailer_id">Retailer:</label>
-                <select name="retailer_id" id="retailer_id" required>
-                    <option value="">Select Retailer</option>
-                    <?php
-                    // Fetch retailer options from the retailers table
-                    $retailer_query = "SELECT retailer_id, retailer_user_id FROM retailers";
-                    $retailer_result = $pdo->query($retailer_query);
-                    $retailers = $retailer_result->fetchAll(PDO::FETCH_ASSOC);
-
-                    foreach ($retailers as $retailer) :
-                        // Fetch retailer's name using retailer_user_id
-                        $user_query = "SELECT name FROM users WHERE user_id = ?";
-                        $user_stmt = $pdo->prepare($user_query);
-                        $user_stmt->execute([$retailer['retailer_user_id']]);
-                        $user = $user_stmt->fetch(PDO::FETCH_ASSOC);
-                    ?>
-                        <option value="<?php echo $retailer['retailer_id']; ?>"><?php echo $user['name']; ?></option>
-                    <?php endforeach; ?>
-                </select>
+            <div class="form-field">
+                <button type="submit" name="submit_waste">Process Waste</button>
             </div>
-            <div class="form-group">
-                <label for="return_status">Return Status:</label>
-                <select name="return_status" id="return_status" required>
-                    <option value="Returned">Returned</option>
-                    <option value="Not Returned">Not Returned</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="return_date">Return Date:</label>
-                <input type="date" name="return_date" id="return_date" required>
-            </div>
-            <div class="form-group">
-                <label for="bag_type">Bag Type:</label>
-                <input type="text" name="bag_type" id="bag_type" required>
-            </div>
-            <div class="form-group">
-                <label for="revenue_from_return">Revenue From Return:</label>
-                <input type="number" step="0.01" name="revenue_from_return" id="revenue_from_return" value="0.00" required>
-            </div>
-            <button type="submit" class="btn btn-primary">Add Waste Batch</button>
+            <?php if ($success_msg_submit): ?>
+                <div class="success"><?php echo $success_msg_submit; ?></div>
+            <?php endif; ?>
         </form>
-
-        <h3>Existing Waste Batches</h3>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Batch ID</th>
-                    <th>Retailer Name</th>
-                    <th>Return Status</th>
-                    <th>Return Date</th>
-                    <th>Bag Type</th>
-                    <th>Revenue From Return</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($waste_batches as $waste) : ?>
-                    <tr>
-                        <td><?php echo $waste['batch_id']; ?></td>
-                        <td><?php echo $waste['retailer_name']; ?></td>
-                        <td><?php echo $waste['return_status']; ?></td>
-                        <td><?php echo $waste['return_date']; ?></td>
-                        <td><?php echo $waste['bag_type']; ?></td>
-                        <td><?php echo number_format($waste['revenue_from_return'], 2); ?></td>
-                        <td>
-                            <a href="edit_waste_batch.php?batch_id=<?php echo $waste['batch_id']; ?>" class="btn btn-warning">Edit</a>
-                            <a href="delete_waste_batch.php?batch_id=<?php echo $waste['batch_id']; ?>" class="btn btn-danger">Delete</a>
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
     </div>
 
-    <script src="script.js"></script> <!-- Ensure you have proper JS functionality if required -->
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2024 Safe Food Traceability System. All rights reserved.</p>
+        </div>
+    </footer>
 </body>
 </html>
