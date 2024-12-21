@@ -599,6 +599,61 @@ body {
     padding: 10px;
     margin-top: 20px;
   }
+
+
+  /* Header Container */
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    margin-top: 20px; /* Add some space from the top */
+}
+
+
+
+  /* Search Form */
+.search-form {
+    display: flex;
+    align-items: center;
+}
+
+.search-bar {
+    padding: 8px;
+    width: 300px;
+    margin-right: 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+.search-btn {
+    padding: 8px 16px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.search-btn:hover {
+    background-color: #2980b9;
+}
+
+/* Add User Button */
+.add-user-btn {
+    padding: 8px 16px;
+    background-color: #27ae60;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    position: absolute;
+    right: 20px;
+}
+
+.add-user-btn:hover {
+    background-color: #2ecc71;
+}
     </style>
 </head>
 <body>
@@ -632,13 +687,14 @@ body {
   </div>
 
 
-    <div class="container">
-        <h2>Manage Users</h2>
+  <div class="header-container">
+    <form method="POST" class="search-form">
+        <input type="text" name="search" placeholder="Search users..." value="<?php echo $search; ?>" class="search-bar" />
+        <button type="submit" class="search-btn">Search</button>
+    </form>
+    <button class="add-user-btn">Add User</button>
+</div>
 
-        <form method="POST">
-            <input type="text" name="search" placeholder="Search users..." value="<?php echo $search; ?>" class="search-bar" />
-            <button type="submit">Search</button>
-        </form>
 
         <table class="crop-table">
             <thead>
