@@ -14,8 +14,6 @@ try {
     die("Database connection failed: " . $e->getMessage());
 }
 
-$cropDetails = '';
-$farmerDetails = '';
 $success_message = '';
 $error_message = '';
 
@@ -28,17 +26,23 @@ $districts = [
 // Fetch crop names for dropdown
 $crop_query = "SELECT * FROM nutrition_crop";
 $crop_result = $pdo->query($crop_query);
-$crops = $crop_result->fetchAll();
+$crops = $crop_result->fetchAll(PDO::FETCH_ASSOC);
 
 // Handle form submission
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $crop_name = $_POST['crop_name'];
     $farmer_id = $_POST['farmer_id'];
-    $harvest_area = $_POST['harvest_area'];
+    $harvest_area = isset($_POST['harvest_area']) ? trim($_POST['harvest_area']) : null; // Harvest Area (District)
+    $harvest_area_size = $_POST['harvest_area_size']; // Harvest Area Size (in acres)
     $quantity = $_POST['quantity'];
     $harvest_date = $_POST['harvest_date'];
-    $batch_date = $_POST['batch_date'];
+    $batch_date = date('Y-m-d'); // Current date for batch creation
     $nutrition_value = $_POST['nutrition_value'];
+
+    // Validate that harvest_area is not empty
+    if (empty($harvest_area)) {
+        $error_message = "Please select a Harvest District.";
+    }
 
     // Check if farmer exists in the database
     $check_farmer_query = "SELECT * FROM farmers WHERE farmer_id = ?";
@@ -48,29 +52,33 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     if (!$farmer_exists) {
         $error_message = "The Farmer info is Not In The Database.";
-    } else {
+    } elseif (empty($error_message)) {
         try {
             // Start a transaction
             $pdo->beginTransaction();
 
-            // Insert into crops table
-            $insert_crop_query = "INSERT INTO crops (name, farmer_id, harvest_area, quantity, harvest_date) 
-                                  VALUES (?, ?, ?, ?, ?)";
+            // Insert into crops table, including harvest_district and certifications as 'Pending'
+            $insert_crop_query = "INSERT INTO crops (name, farmer_id, harvest_area, harvest_area_size, quantity, harvest_date, harvest_district, certifications) 
+                                  VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
             $stmt = $pdo->prepare($insert_crop_query);
-            $stmt->execute([$crop_name, $farmer_id, $harvest_area, $quantity, $harvest_date]);
+            $stmt->execute([$crop_name, $farmer_id, $harvest_area, $harvest_area_size, $quantity, $harvest_date, $harvest_area, 'Pending']);
 
             // Get crop_id of the inserted crop
             $crop_id = $pdo->lastInsertId();
 
-            // Insert into batches table (with auto-increment batch_id)
-            $nutrition_value_certification = "Nutrition Value Checked: " . date('Y-m-d H:i:s');
-            $insert_batch_query = "INSERT INTO batches (crop_id, status, certifications, quality_check_status, batch_date, nutrition_value) 
-                                   VALUES (?, 'Storable', ?, 'Pass', ?, ?)";
-            $stmt = $pdo->prepare($insert_batch_query);
-            $stmt->execute([$crop_id, $nutrition_value_certification, $batch_date, $nutrition_value]);
+            // Generate a unique batch ID
+            $batch_id = uniqid('batch_');
 
-            // Get the auto-generated batch ID
-            $batch_id = $pdo->lastInsertId();
+            // Insert into batches table with 'Pending' status and nutrition value
+            $insert_batch_query = "INSERT INTO batches (batch_id, crop_id, status, quality_check_status, batch_date, nutrition_value) 
+                                   VALUES (?, ?, 'Pending', 'Pending', ?, ?)";
+            $stmt = $pdo->prepare($insert_batch_query);
+            $stmt->execute([$batch_id, $crop_id, $batch_date, $nutrition_value]);
+
+            // Update the crops table to set the batch_id and batch_date for the crop
+            $update_crop_query = "UPDATE crops SET batch_id = ?, batch_date = ? WHERE crop_id = ?";
+            $stmt = $pdo->prepare($update_crop_query);
+            $stmt->execute([$batch_id, $batch_date, $crop_id]);
 
             // Commit the transaction
             $pdo->commit();
@@ -86,13 +94,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 
-// Fetch farmer details when Farmer ID is provided
-if (isset($_POST['farmer_id'])) {
+// Fetch farmer details when Farmer ID is provided (if needed separately)
+if (isset($_POST['fetch_farmer_details'])) {
     $farmer_id = $_POST['farmer_id'];
     $farmer_query = "SELECT * FROM farmers WHERE farmer_id = ?";
     $stmt = $pdo->prepare($farmer_query);
     $stmt->execute([$farmer_id]);
     $farmer_details = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($farmer_details) {
+        echo json_encode(['status' => 'success', 'farmer_details' => $farmer_details]);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Farmer not found']);
+    }
+    exit;
 }
 ?>
 
@@ -488,7 +503,6 @@ body {
       <ul>
       <li><a href="dashboard_admin.php">Dashboard</a></li>
         <li><a href="http://localhost:3000/Safe-Food-Traceability-System/admin/add_user.php">Manage Users</a></li>
-
         <li><a href="http://localhost:3000/Safe-Food-Traceability-System/admin/add_crop.php"class="active">Manage Batches</a></li>
         <li><a href="http://manage_waste.php">Waste Management</a></li>
         <li><a href="generate_reports.php">Generate Reports</a></li>
@@ -568,25 +582,33 @@ body {
         </div>
 
 
+<!-- Harvest Area and Size -->
+<div class="form-group">
+    <label for="harvest_area">Harvest Area (District):</label>
+    <select name="harvest_area" id="harvest_area" required>
+        <option value="">Select District</option>
+        <?php foreach ($districts as $district) : ?>
+            <option value="<?php echo $district; ?>"><?php echo $district; ?></option>
+        <?php endforeach; ?>
+    </select>
+</div>
 
-        <!-- Additional Crop Details -->
-        <div class="form-group">
-            <label for="harvest_area">Harvest Area (District):</label>
-            <select name="harvest_area" id="harvest_area" required>
-                <option value="">Select District</option>
-                <?php foreach ($districts as $district) : ?>
-                    <option value="<?php echo $district; ?>"><?php echo $district; ?></option>
-                <?php endforeach; ?>
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="quantity">Quantity (kg):</label>
-            <input type="number" name="quantity" id="quantity" required>
-        </div>
-        <div class="form-group">
-            <label for="harvest_date">Harvest Date:</label>
-            <input type="date" name="harvest_date" id="harvest_date" required>
-        </div>
+<div class="form-group">
+    <label for="harvest_area_size">Harvest Area Size (in acres):</label>
+    <input type="number" name="harvest_area_size" id="harvest_area_size" step="any" required>
+</div>
+
+<div class="form-group">
+    <label for="quantity">Quantity (kg):</label>
+    <input type="number" name="quantity" id="quantity" required>
+</div>
+
+<div class="form-group">
+    <label for="harvest_date">Harvest Date:</label>
+    <input type="date" name="harvest_date" id="harvest_date" required>
+</div>
+
+
         
 
 

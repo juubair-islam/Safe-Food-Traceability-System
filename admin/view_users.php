@@ -6,27 +6,41 @@ $password = '';
 $dbname = 'safe_food_traceability';
 $conn = new mysqli($host, $username, $password, $dbname);
 
+// Check connection
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Handle Delete or Restrict actions
+// Handle Delete, Restrict, and Unrestrict actions
 if (isset($_POST['action'])) {
-    $user_id = $_POST['user_id'];
-    $action = $_POST['action'];
+    $user_id = $_POST['user_id'];  // Get the user ID from the request
+    $action = $_POST['action'];  // Get the action (delete, restrict, unrestrict)
 
     if ($action == 'delete') {
         // Delete user
-        $delete_sql = "DELETE FROM users WHERE user_id = '$user_id'";
-        $conn->query($delete_sql);
+        $delete_sql = "DELETE FROM users WHERE user_id = ?";
+        $stmt = $conn->prepare($delete_sql);
+        $stmt->bind_param('i', $user_id);  // Use 'i' for integer binding
+        $stmt->execute();
+        $stmt->close();
     } elseif ($action == 'restrict') {
-        // Restrict user (example: update role to 'restricted')
-        $restrict_sql = "UPDATE users SET role = 'restricted' WHERE user_id = '$user_id'";
-        $conn->query($restrict_sql);
+        // Restrict user (set status to 'Inactive')
+        $restrict_sql = "UPDATE users SET status = 'Inactive' WHERE user_id = ?";
+        $stmt = $conn->prepare($restrict_sql);
+        $stmt->bind_param('i', $user_id);
+        $stmt->execute();
+        $stmt->close();
+    } elseif ($action == 'unrestrict') {
+        // Unrestrict user (set status to 'Active')
+        $unrestrict_sql = "UPDATE users SET status = 'Active' WHERE user_id = ?";
+        $stmt = $conn->prepare($unrestrict_sql);
+        $stmt->bind_param('i', $user_id);
+        $stmt->execute();
+        $stmt->close();
     }
 }
 
-// Search functionality
+// Search functionality (optional, if needed)
 $search = '';
 if (isset($_POST['search']) && !empty($_POST['search'])) {
     $search = $_POST['search'];
@@ -42,292 +56,205 @@ $result = $conn->query($sql);
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>View Users - Safe Food Traceability System</title>
-  <link rel="stylesheet" href="../styles/style.css"> <!-- Link to your external CSS -->
-  <!-- DataTables CSS -->
-  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
-
-  <style>
-    /* Adding some basic styles for notification messages */
-    .notification {
-      padding: 10px;
-      margin: 10px 0;
-      border-radius: 5px;
-      color: white;
-      font-weight: bold;
-    }
-    .success-message {
-      background-color: green;
-    }
-    .error-message {
-      background-color: red;
-    }
-
-    /* Styling for buttons */
-    button {
-      padding: 8px 16px;
-      border: none;
-      border-radius: 4px;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .delete-button {
-      background-color: red;
-      transition: background-color 0.3s;
-    }
-
-    .delete-button:hover {
-      background-color: darkred;
-    }
-
-    .restrict-button {
-      background-color: orange;
-      transition: background-color 0.3s;
-    }
-
-    .restrict-button:hover {
-      background-color: darkorange;
-    }
-
-    /* Styling for search input and button */
-    input[type="text"] {
-      padding: 8px;
-      font-size: 14px;
-      width: 300px;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-    }
-
-    input[type="submit"] {
-      padding: 8px 16px;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    input[type="submit"]:hover {
-      background-color: #45a049;
-    }
-
-    /* DataTable customizations */
-    #usersTable_length,
-    #usersTable_filter {
-      display: none;
-    }
-  </style>
-</head>
-<body>
-
-<!-- Header Section -->
-<div class="header">
-    <div class="logo-container">
-        <img src="../images/logo.png" alt="Logo" class="logo" />
-        <div class="project-name">
-            <strong>Farm to Fork</strong> <span>Safe Food Traceability System</span>
-        </div>
-    </div>
-    <div class="role">Admin Dashboard</div>
-</div>
-
-<!-- Top Navigation Bar -->
-<div class="top-nav">
-    <ul>
-        <li><a href="dashboard_admin.php">Dashboard</a></li>
-        <li><a href="add_user.php">Manage Users</a></li>
-        <li><a href="manage_batches.html">Manage Batches</a></li>
-        <li><a href="manage_waste.php">Waste Management</a></li>
-        <li><a href="generate_reports.php">Generate Reports</a></li>
-        <li><a href="farmer_management.php">Farmers</a></li>
-        <li><a href="barcode_management.php">Barcodes</a></li>
-        <li><a href="transport_management.php">Transport</a></li>
-        <li><a href="../index.php" class="logout-button">Logout</a></li>
-    </ul>
-</div>
-
-<div class="container">
-    <h2>View Users</h2>
-    <p>View and search users in the system.</p>
-
-    <!-- Search Box -->
-    <form method="POST" action="">
-        <input type="text" name="search" placeholder="Search by ID, Name, Role, etc." value="<?php echo htmlspecialchars($search); ?>" />
-        <input type="submit" value="Search">
-    </form>
-
-    <!-- Users Table -->
-    <h3>Users</h3>
-    <table id="usersTable">
-        <thead>
-            <tr>
-                <th>User ID</th>
-                <th>Role</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Region</th>
-                <th>Created At</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php
-            if ($result->num_rows > 0) {
-                while ($row = $result->fetch_assoc()) {
-                    echo "<tr>";
-                    echo "<td>" . $row['user_id'] . "</td>";
-                    echo "<td>" . $row['role'] . "</td>";
-                    echo "<td>" . $row['name'] . "</td>";
-                    echo "<td>" . $row['email'] . "</td>";
-                    echo "<td>" . $row['region'] . "</td>";
-                    echo "<td>" . $row['created_at'] . "</td>";
-                    echo "<td>
-                            <form method='POST' action='' style='display:inline;'>
-                                <input type='hidden' name='user_id' value='" . $row['user_id'] . "'>
-                                <button type='submit' name='action' value='delete' class='delete-button' onclick='return confirm(\"Are you sure you want to delete this user?\")'>Delete</button>
-                            </form>
-                            <form method='POST' action='' style='display:inline;'>
-                                <input type='hidden' name='user_id' value='" . $row['user_id'] . "'>
-                                <button type='submit' name='action' value='restrict' class='restrict-button' onclick='return confirm(\"Are you sure you want to restrict this user?\")'>Restrict</button>
-                            </form>
-                          </td>";
-                    echo "</tr>";
-                }
-            } else {
-                echo "<tr><td colspan='7'>No users found</td></tr>";
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Users</title>
+    <script>
+        function confirmAction(userId, action) {
+            if (confirm("Are you sure you want to " + action + " this user?")) {
+                var form = document.createElement("form");
+                form.method = "POST";
+                var input1 = document.createElement("input");
+                input1.type = "hidden";
+                input1.name = "user_id";
+                input1.value = userId;
+                var input2 = document.createElement("input");
+                input2.type = "hidden";
+                input2.name = "action";
+                input2.value = action;
+                form.appendChild(input1);
+                form.appendChild(input2);
+                document.body.appendChild(form);
+                form.submit();
             }
-            ?>
-        </tbody>
-    </table>
-</div>
+        }
+    </script>
 
-<!-- Footer Section -->
-<div class="footer">
-    &copy; 2024 Farm to Fork: Safe Food Traceability System. All rights reserved.
-</div>
+    <style>
+        /* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
 
-<!-- Scripts -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-<script>
-    $(document).ready(function() {
-        $('#usersTable').DataTable({
-            "bPaginate": true,
-            "bFilter": false, // Disable the search bar
-            "bLengthChange": false, // Disable the entries dropdown
-        });
-    });
-</script>
+        /* Header */
+        .header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-</body>
-</html>
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            width: 40px;
+            margin-right: 10px;
+        }
+
+        .project-name {
+            font-size: 18px;
+        }
+
+        .role {
+            font-size: 22px;
+        }
+
+        /* Navigation */
+        .top-nav {
+            background-color: #34495e;
+        }
+
+        .top-nav ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+
+        .top-nav li {
+            padding: 10px;
+        }
+
+        .top-nav a {
+            text-decoration: none;
+            color: white;
+            padding: 8px 16px;
+            display: block;
+        }
+
+        .top-nav a:hover {
+            background-color: #2980b9;
+        }
+
+        /* Main Content */
+        .dashboard-content {
+            padding: 20px;
+        }
+
+        .add-crop-section {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .add-crop-button {
+            padding: 10px 20px;
+            background-color: #27ae60;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+
+        .search-bar {
+            padding: 8px;
+            width: 300px;
+            margin-right: 10px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+
+        /* Table */
+        .crop-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .crop-table th, .crop-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .crop-table th {
+            background-color: #2c3e50;
+            color: white;
+        }
+
+        .crop-table tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .crop-table td a {
+            color: #3498db;
+            text-decoration: none;
+        }
+
+        .crop-table td a:hover {
+            text-decoration: underline;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            margin-top: 20px;
+        }
+
+                /* Action Buttons */
+            .delete-btn {
+            background-color: #e74c3c;
+            color: white;
+            padding: 6px 12px;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .delete-btn:hover {
+            background-color: #c0392b;
+        }
 
 
 
-<style>
+        .restrict-btn {
+            background-color: #f39c12;
+            color: white;
+            padding: 6px 12px;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
 
-/* styles.css */
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f9;
-    margin: 0;
-    padding: 0;
-}
+        .restrict-btn:hover {
+            background-color: #e67e22;
+        }
 
-.container {
-    max-width: 900px;
-    margin: 50px auto;
-    background: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
+        .unrestrict-btn {
+            background-color: #27ae60;
+            color: white;
+            padding: 6px 12px;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
 
-h1 {
-    text-align: center;
-    color: #333;
-}
-
-form {
-    margin: 20px 0;
-}
-
-form label {
-    display: block;
-    margin-bottom: 8px;
-    color: #555;
-    font-weight: bold;
-}
-
-form input,
-form select {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 20px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 14px;
-}
-
-form button {
-    background: #007bff;
-    color: white;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-}
-
-form button:hover {
-    background: #0056b3;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-}
-
-table th,
-table td {
-    border: 1px solid #ddd;
-    padding: 10px;
-    text-align: left;
-}
-
-table th {
-    background: #007bff;
-    color: white;
-}
-
-table tr:nth-child(even) {
-    background: #f9f9f9;
-}
-
-.action-btn {
-    display: inline-block;
-    padding: 5px 10px;
-    color: white;
-    border-radius: 4px;
-    text-decoration: none;
-    font-size: 14px;
-}
-
-.action-btn.edit {
-    background: #28a745;
-}
-
-.action-btn.delete {
-    background: #dc3545;
-}
+        .unrestrict-btn:hover {
+            background-color: #2ecc71;
+        }
 
 
-/* General Styles */
+        /* General Styles */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -672,6 +599,81 @@ body {
     padding: 10px;
     margin-top: 20px;
   }
-  
+    </style>
+</head>
+<body>
+  <!-- Header Section -->
+  <div class="header">
+    <div class="logo-container">
+      <img src="../images/logo.png" alt="Logo" class="logo" />
+      <div class="project-name">
+        <strong>Farm to Fork</strong> <span>Safe Food Traceability System</span>
+      </div>
+    </div>
+    <div class="role">Admin Dashboard</div>
+  </div>
 
-</style>
+  <!-- Top Navigation Bar -->
+  <div class="top-nav">
+    <div class="nav-links">
+      <ul>
+        <li><a href="dashboard_admin.php">Dashboard</a></li>
+        <li><a href="http://localhost:3000/Safe-Food-Traceability-System/admin/add_user.php"class="active">Manage Users</a></li>
+        <li><a href="http://localhost:3000/Safe-Food-Traceability-System/admin/add_crop.php">Manage Batches</a></li>
+        <li><a href="http://manage_waste.php">Waste Management</a></li>
+        <li><a href="generate_reports.php">Generate Reports</a></li>
+        <li><a href="http://localhost:3000/Safe-Food-Traceability-System/admin/add_farmer.php">Farmers</a></li>
+        <li><a href="barcode_management.php">Barcodes</a></li>
+        <li><a href="transport_management.php">Transport</a></li>
+        <li><a href="../index.php" class="logout-button">Logout</a></li>
+      </ul>
+      </ul>
+    </div>
+  </div>
+
+
+    <div class="container">
+        <h2>Manage Users</h2>
+
+        <form method="POST">
+            <input type="text" name="search" placeholder="Search users..." value="<?php echo $search; ?>" class="search-bar" />
+            <button type="submit">Search</button>
+        </form>
+
+        <table class="crop-table">
+            <thead>
+                <tr>
+                    <th>User ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php while ($row = $result->fetch_assoc()): ?>
+                    <tr>
+                        <td><?php echo $row['user_id']; ?></td>
+                        <td><?php echo $row['name']; ?></td>
+                        <td><?php echo $row['email']; ?></td>
+                        <td><?php echo $row['status']; ?></td>
+                        <td>
+                            <button class="delete-btn" onclick="confirmAction(<?php echo $row['user_id']; ?>, 'delete')">Delete</button>
+                            <?php if ($row['status'] == 'Active'): ?>
+                                <button class="restrict-btn"  onclick="confirmAction(<?php echo $row['user_id']; ?>, 'restrict')">Restrict</button>
+                            <?php else: ?>
+                                <button class="unrestrict-btn" onclick="confirmAction(<?php echo $row['user_id']; ?>, 'unrestrict')">Unrestrict</button>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                <?php endwhile; ?>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Footer Section -->
+    <div class="footer">
+        <p>&copy; 2024 Safe Food Traceability System</p>
+    </div>
+</body>
+</html>

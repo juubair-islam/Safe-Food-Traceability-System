@@ -12,27 +12,39 @@ if ($conn->connect_error) {
 
 // Handle adding a new user
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_user'])) {
-  $role = $_POST['role'];
-  $name = $_POST['name'];
-  $email = $_POST['email'];
-  $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
-  $region = $_POST['region'];
+    $role = $_POST['role'];
+    $name = $_POST['name'];
+    $email = $_POST['email'];
+    $password = $_POST['password'];  // Plain password before hashing
+    $region = $_POST['region'];
+    $contact_number = $_POST['contact_number']; // Get the contact number from the form
 
-  // Prepare and bind
-  $stmt = $conn->prepare("INSERT INTO users (role, name, email, password, region, registration_status)
-                          VALUES (?, ?, ?, ?, ?, 'pending')");
-  $stmt->bind_param("sssss", $role, $name, $email, $password, $region);
+    // Check if the email already exists in the database
+    $email_check_sql = "SELECT * FROM users WHERE email = ?";
+    $stmt = $conn->prepare($email_check_sql);
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
-  if ($stmt->execute()) {
-      $last_user_id = $stmt->insert_id; // Get the auto-generated User ID
-      $success_message = "New user added successfully. User ID: " . $last_user_id;
-  } else {
-      $error_message = "Error: " . $stmt->error;
-  }
+    if ($result->num_rows > 0) {
+        // Email exists, show a warning message
+        $error_message = "Error: The email address is already in use.";
+    } else {
+        // Email is unique, insert the new user (with plaintext password)
+        $stmt = $conn->prepare("INSERT INTO users (role, name, email, password, region, registration_status, contact_number)
+                                VALUES (?, ?, ?, ?, ?, 'pending', ?)");
+        $stmt->bind_param("ssssss", $role, $name, $email, $password, $region, $contact_number); // Bind plaintext password
 
-  $stmt->close();
+        if ($stmt->execute()) {
+            $last_user_id = $stmt->insert_id; // Get the auto-generated User ID
+            $success_message = "New user added successfully. User ID: " . $last_user_id;
+        } else {
+            $error_message = "Error: " . $stmt->error;
+        }
+    }
+
+    $stmt->close();
 }
-
 
 // Handle approve action
 if (isset($_GET['approve'])) {
@@ -61,7 +73,7 @@ $search = '';
 if (isset($_POST['search']) && !empty($_POST['search'])) {
     $search = $_POST['search'];
     $sql = "SELECT * FROM users WHERE 
-            (user_id LIKE '%$search%' OR name LIKE '%$search%' OR email LIKE '%$search%' OR region LIKE '%$search%' OR role LIKE '%$search%')
+            (user_id LIKE '%$search%' OR name LIKE '%$search%' OR email LIKE '%$search%' OR region LIKE '%$search%' OR role LIKE '%$search%' OR contact_number LIKE '%$search%')
             AND registration_status = 'pending'";
 } else {
     $sql = "SELECT * FROM users WHERE registration_status = 'pending'";
@@ -69,6 +81,9 @@ if (isset($_POST['search']) && !empty($_POST['search'])) {
 
 $result = $conn->query($sql);
 ?>
+
+
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -79,6 +94,80 @@ $result = $conn->query($sql);
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <style>
+
+
+/* Success Message Styling */
+.success-message {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px;
+    margin: 20px 0;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+/* Error Message Styling */
+.error-message {
+    background-color: #f44336;
+    color: white;
+    padding: 10px;
+    margin: 20px 0;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+/* Warning Message Styling */
+.warning-message {
+    background-color: #ff9800;
+    color: white;
+    padding: 10px;
+    margin: 20px 0;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+/* Button Styling */
+button, input[type="submit"] {
+    background-color: #4CAF50; /* Green background */
+    color: white; /* White text */
+    border: none; /* No border */
+    padding: 10px 20px; /* Padding for the buttons */
+    text-align: center;
+    text-decoration: none; /* Remove underline from text */
+    display: inline-block; /* Allow buttons to be inline */
+    font-size: 16px; /* Text size */
+    cursor: pointer; /* Change cursor to pointer on hover */
+    border-radius: 5px; /* Rounded corners */
+    transition: background-color 0.3s ease, transform 0.3s ease; /* Smooth transition */
+}
+
+/* Hover Effect for Buttons */
+button:hover, input[type="submit"]:hover {
+    background-color: #45a049; /* Darker green when hovered */
+    transform: scale(1.05); /* Slightly enlarge the button */
+}
+
+/* Focus Effect for Buttons */
+button:focus, input[type="submit"]:focus {
+    outline: none; /* Remove the outline when focused */
+    box-shadow: 0 0 8px rgba(0, 128, 0, 0.6); /* Add a green glow effect */
+}
+
+/* Search Button Styling */
+input[type="submit"] {
+    background-color: #2196F3; /* Blue background */
+    padding: 8px 16px;
+}
+
+input[type="submit"]:hover {
+    background-color: #0b7dda; /* Darker blue when hovered */
+}
+
+/* Add some space between buttons */
+form input[type="submit"], form button {
+    margin-top: 15px;
+}
+
 /* General Styles */
 body {
     font-family: Arial, sans-serif;
@@ -468,45 +557,49 @@ body {
     <h2>Manage Users</h2>
     <p>Add a new user to the system or manage existing users.</p>
 
-    <!-- Display Messages -->
-    <?php if (isset($success_message)) { echo "<div class='notification success-message'>$success_message</div>"; } ?>
-    <?php if (isset($error_message)) { echo "<div class='notification error-message'>$error_message</div>"; } ?>
+  <!-- Display Messages -->
+  <?php if (isset($success_message)) { echo "<div class='success-message'>$success_message</div>"; } ?>
+  <?php if (isset($error_message)) { echo "<div class='error-message'>$error_message</div>"; } ?>
+  <?php if (isset($warning_message)) { echo "<div class='warning-message'>$warning_message</div>"; } ?>
 
     <!-- Add User Form -->
     <form method="POST" action="">
-        <label for="role">Role:</label>
-        <select name="role" required>
-            <option value="nutritionist">Nutritionist</option>
-            <option value="processing_unit_manager">Processing Unit Manager</option>
-            <option value="government_officer">Government Officer</option>
-            <option value="farmer">Farmer</option>
-            <option value="retailer">Retailer</option>
-        </select>
+    <label for="role">Role:</label>
+    <select name="role" required>
+        <option value="nutritionist">Nutritionist</option>
+        <option value="processing_unit_manager">Processing Unit Manager</option>
+        <option value="government_officer">Government Officer</option>
+        <option value="farmer">Farmer</option>
+        <option value="retailer">Retailer</option>
+    </select>
 
+    <label for="name">Name:</label>
+    <input type="text" name="name" required>
 
-        <label for="name">Name:</label>
-        <input type="text" name="name" required>
+    <label for="email">Email:</label>
+    <input type="email" name="email" required>
 
-        <label for="email">Email:</label>
-        <input type="email" name="email" required>
+    <label for="password">Password:</label>
+    <input type="password" name="password" required>
 
-        <label for="password">Password:</label>
-        <input type="password" name="password" required>
+    <label for="region">Region:</label>
+    <select name="region" required>
+        <option value="Dhaka">Dhaka</option>
+        <option value="Chittagong">Chittagong</option>
+        <option value="Khulna">Khulna</option>
+        <option value="Rajshahi">Rajshahi</option>
+        <option value="Sylhet">Sylhet</option>
+        <option value="Barisal">Barisal</option>
+        <option value="Rangpur">Rangpur</option>
+        <option value="Mymensingh">Mymensingh</option>
+    </select>
 
-        <label for="region">Region:</label>
-        <select name="region" required>
-            <option value="Dhaka">Dhaka</option>
-            <option value="Chittagong">Chittagong</option>
-            <option value="Khulna">Khulna</option>
-            <option value="Rajshahi">Rajshahi</option>
-            <option value="Sylhet">Sylhet</option>
-            <option value="Barisal">Barisal</option>
-            <option value="Rangpur">Rangpur</option>
-            <option value="Mymensingh">Mymensingh</option>
-        </select>
+    <label for="contact_number">Contact Number:</label>
+    <input type="text" name="contact_number" required> <!-- New contact number field -->
 
-        <input type="submit" name="add_user" value="Add User">
-    </form>
+    <input type="submit" name="add_user" value="Add User">
+</form>
+
 
     <!-- Search Box -->
     <form method="POST" action="">
