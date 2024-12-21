@@ -68,9 +68,9 @@ $conn->close();
             padding: 0;
             background-color: #f4f4f4;
             display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 100vh;
         }
 
         h2 {
@@ -78,36 +78,38 @@ $conn->close();
         }
 
         /* Logo and Title Section */
-        .logo-section {
+        .header {
             text-align: center;
+            margin-top: 20px;
+        }
+
+        .header img {
+            width: 100px; /* Adjust logo size */
             margin-bottom: 10px;
         }
 
-        .logo-section img {
-            width: 80px; /* Adjust logo size */
-            margin-bottom: 10px;
-            background: transparent;
-        }
-
-        .logo-section h1 {
+        .header h1 {
             font-size: 28px;
             color: #2980b9;
+            margin: 5px 0;
         }
 
-        .logo-section h3 {
-            font-size: 22px;
+        .header h3 {
+            font-size: 20px;
             color: #16a085;
+            margin: 0;
         }
 
         /* Login Form Styling */
         .login-container {
-            background-color: White;
+            background-color: white;
             padding: 30px;
             border-radius: 8px;
             box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
             width: 400px;
             max-width: 100%;
             text-align: center;
+            margin: 20px auto;
         }
 
         .login-container input[type="email"],
@@ -148,13 +150,6 @@ $conn->close();
             font-size: 14px;
         }
 
-        /* Success message */
-        .success-message {
-            color: #2ecc71;
-            margin-bottom: 15px;
-            font-size: 14px;
-        }
-
         /* Footer */
         .footer {
             background-color: #2c3e50;
@@ -162,24 +157,23 @@ $conn->close();
             text-align: center;
             padding: 10px;
             font-size: 12px;
-            margin-top: 20px;
+            margin-top: auto;
         }
     </style>
 </head>
 <body>
-
-    <!-- Logo and Title Section -->
-    <div class="logo-section">
-    <img src="../images/logo.png" alt="Logo" class="logo" />
+    <!-- Header Section -->
+    <div class="header">
+        <img src="../images/logo.png" alt="Logo" />
         <h1>Safe Food Traceability System</h1>
-        <h3>Farm To Fork</h3>
+        <h3>Farm to Fork</h3>
     </div>
 
     <!-- Login Form -->
     <div class="login-container">
         <h2>Login to Safe Food Traceability System</h2>
 
-        <!-- Display Error or Success Messages -->
+        <!-- Display Error Messages -->
         <div id="message-container">
             <?php if (isset($error_message)) { echo '<div class="error-message">' . $error_message . '</div>'; } ?>
         </div>
@@ -203,6 +197,5 @@ $conn->close();
     <div class="footer">
         &copy; 2024 Farm to Fork: Safe Food Traceability System. All rights reserved.
     </div>
-
 </body>
 </html>

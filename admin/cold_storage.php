@@ -73,6 +73,10 @@ if (isset($_POST['release_from_cold_storage']) && isset($batch)) {
 }
 ?>
 
+
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -81,6 +85,8 @@ if (isset($_POST['release_from_cold_storage']) && isset($batch)) {
     <title>Cold Storage</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
         body {
             background-color: #f8f9fa;

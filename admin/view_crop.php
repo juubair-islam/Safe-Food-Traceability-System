@@ -579,7 +579,15 @@ body {
   </div>
 
   <div class="container">
-    <h1>View Crops and Batches</h1>
+    <h1>Manage Crops and Batches</h1>
+
+    <!-- Add Crop Button -->
+    <div class="add-crop-section">
+        <a href="http://localhost:3000/Safe-Food-Traceability-System/admin/add_crop.php" class="add-crop-button">
+            Add Crop
+        </a>
+    </div>
+
 
     <!-- Success/Error Messages -->
     <?php if ($success_message): ?>
