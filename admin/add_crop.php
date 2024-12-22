@@ -485,11 +485,10 @@ body {
 
 </head>
 <body>
-
   <!-- Header Section -->
   <div class="header">
     <div class="logo-container">
-    <img src="../images/Logo.png" alt="Logo" />
+      <img src="../images/logo.png" alt="Logo" class="logo" />
       <div class="project-name">
         <strong>Farm to Fork</strong> <span>Safe Food Traceability System</span>
       </div>
@@ -501,7 +500,6 @@ body {
   <div class="top-nav">
     <div class="nav-links">
       <ul>
-      <li>
       <li><a href="http://localhost:3000/Safe-Food-Traceability-System/admin/admin_dashboard.php">Dashboard</a></li>
         <li><a href="http://localhost:3000/Safe-Food-Traceability-System/admin/view_users.php">Manage Users</a></li>
         <li><a href="http://localhost:3000/Safe-Food-Traceability-System/admin/view_farmer.php">Farmer Details</a></li>

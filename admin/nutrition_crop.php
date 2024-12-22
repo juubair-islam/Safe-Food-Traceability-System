@@ -92,9 +92,6 @@ $crop_result = $pdo->query($crop_query);
 $crops = $crop_result->fetchAll();
 ?>
 
-<?php
-// Database connection and logic remain the same as the previous version
-?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -136,30 +133,30 @@ $crops = $crop_result->fetchAll();
         <div class="nutrition-values">
             <div class="nutrition-row">
                 <div class="form-group">
-                    <label for="nutrition_value_day_1_3">Day 1-3:</label>
+                    <label for="nutrition_value_day_1_3">Nutrition Value of Day 1-3:</label>
                     <input type="number" step="0.01" name="nutrition_value_day_1_3" id="nutrition_value_day_1_3" required>
                 </div>
                 <div class="form-group">
-                    <label for="nutrition_value_day_3_5">Day 3-5:</label>
+                    <label for="nutrition_value_day_3_5">Nutrition Value of 3-5:</label>
                     <input type="number" step="0.01" name="nutrition_value_day_3_5" id="nutrition_value_day_3_5" required>
                 </div>
                 <div class="form-group">
-                    <label for="nutrition_value_day_5_7">Day 5-7:</label>
+                    <label for="nutrition_value_day_5_7">Nutrition Value of 5-7:</label>
                     <input type="number" step="0.01" name="nutrition_value_day_5_7" id="nutrition_value_day_5_7" required>
                 </div>
             </div>
 
             <div class="nutrition-row">
                 <div class="form-group">
-                    <label for="nutrition_value_day_7_10">Day 7-10:</label>
+                    <label for="nutrition_value_day_7_10">Nutrition Value of 7-10:</label>
                     <input type="number" step="0.01" name="nutrition_value_day_7_10" id="nutrition_value_day_7_10" required>
                 </div>
                 <div class="form-group">
-                    <label for="nutrition_value_day_10_15">Day 10-15:</label>
+                    <label for="nutrition_value_day_10_15">Nutrition Value of 10-15:</label>
                     <input type="number" step="0.01" name="nutrition_value_day_10_15" id="nutrition_value_day_10_15" required>
                 </div>
                 <div class="form-group">
-                    <label for="nutrition_value_day_15_plus">Day 15+:</label>
+                    <label for="nutrition_value_day_15_plus">Nutrition Value of Day 15+:</label>
                     <input type="number" step="0.01" name="nutrition_value_day_15_plus" id="nutrition_value_day_15_plus" required>
                 </div>
             </div>
