@@ -2,10 +2,10 @@
 // config.php
 
 // Database credentials
-$servername = "localhost";  // Your database host (e.g., 'localhost' or an IP address)
-$username = "root";         // Your database username
-$password = "";             // Your database password (default is empty for XAMPP)
-$dbname = "safe_food_traceability"; // Your database name
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "safe_food_traceability";
 
 // Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
@@ -17,55 +17,28 @@ if ($conn->connect_error) {
 
 // Fetch total farmer count
 $query_farmers = "SELECT COUNT(*) AS total_farmers FROM farmers";
-$result_farmers = $conn->query($query_farmers);
-$total_farmers = $result_farmers->fetch_assoc()['total_farmers'];
+$total_farmers = $conn->query($query_farmers)->fetch_assoc()['total_farmers'];
 
 // Fetch total retailer count
 $query_retailers = "SELECT COUNT(*) AS total_retailers FROM retailers";
-$result_retailers = $conn->query($query_retailers);
-$total_retailers = $result_retailers->fetch_assoc()['total_retailers'];
+$total_retailers = $conn->query($query_retailers)->fetch_assoc()['total_retailers'];
 
-// Fetch harvest district vs crops (scattered line chart data)
+// Fetch harvest district vs crops
 $query_area_crops = "SELECT harvest_district, COUNT(crop_id) AS crop_count FROM crops GROUP BY harvest_district";
-$result_area_crops = $conn->query($query_area_crops);
-$area_crops_data = [];
-while ($row = $result_area_crops->fetch_assoc()) {
-    $area_crops_data[] = $row;
-}
+$area_crops_data = $conn->query($query_area_crops)->fetch_all(MYSQLI_ASSOC);
 
-// Fetch crop distribution (pie chart data)
+// Fetch crop distribution
 $query_crop_distribution = "SELECT name AS crop_name, COUNT(*) AS crop_count FROM crops GROUP BY name";
-$result_crop_distribution = $conn->query($query_crop_distribution);
-$crop_distribution_data = [];
-while ($row = $result_crop_distribution->fetch_assoc()) {
-    $crop_distribution_data[] = $row;
-}
+$crop_distribution_data = $conn->query($query_crop_distribution)->fetch_all(MYSQLI_ASSOC);
 
-// Fetch batch status (bar chart data) with updated status values
+// Fetch batch status
 $query_batch_status = "SELECT status, COUNT(*) AS batch_count FROM batches WHERE status IN ('Storable', 'Non-Storable', 'Damaged', 'Cold storage', 'Released from cold storage') GROUP BY status";
-$result_batch_status = $conn->query($query_batch_status);
-$batch_status_data = [];
-while ($row = $result_batch_status->fetch_assoc()) {
-    $batch_status_data[] = $row;
-}
+$batch_status_data = $conn->query($query_batch_status)->fetch_all(MYSQLI_ASSOC);
 
-// Fetch crop vs harvest area size (scattered graph data)
-$query_crop_area_size = "SELECT name AS crop_name, harvest_area_size FROM crops";
-$result_crop_area_size = $conn->query($query_crop_area_size);
-$crop_area_size_data = [];
-while ($row = $result_crop_area_size->fetch_assoc()) {
-    $crop_area_size_data[] = $row;
-}
-
-
-
-
+// Fetch crop vs harvest area size
 $query_crop_area_size = "SELECT name AS crop_name, SUM(harvest_area_size) AS total_area_size FROM crops GROUP BY name";
-$result_crop_area_size = $conn->query($query_crop_area_size);
-$crop_area_size_data = [];
-while ($row = $result_crop_area_size->fetch_assoc()) {
-    $crop_area_size_data[] = $row;
-}
+$crop_area_size_data = $conn->query($query_crop_area_size)->fetch_all(MYSQLI_ASSOC);
+
 ?>
 
 
@@ -703,59 +676,27 @@ body {
 
 
 <script>
-// Crop vs Harvest Area Size Line Chart with Connecting Lines
+// Crop vs Harvest Area Size Line Chart
 const cropAreaSizeLineCtx = document.getElementById('cropAreaSizeLineChart').getContext('2d');
-const cropAreaSizeData = <?= json_encode($crop_area_size_data); ?>; // The data you retrieved from the SQL query
-
-// Grouping by crop name and summing the harvest area sizes
-const groupedCropAreaSizeData = cropAreaSizeData.reduce((acc, data) => {
-    if (acc[data.crop_name]) {
-        acc[data.crop_name].y += parseFloat(data.harvest_area_size);  // Sum the area if the crop name is the same
-    } else {
-        acc[data.crop_name] = { x: data.crop_name, y: parseFloat(data.harvest_area_size) };
-    }
-    return acc;
-}, {});
-
-const groupedData = Object.values(groupedCropAreaSizeData);
-
-// Crop vs Harvest Area Size Chart with connecting lines
+const cropAreaSizeData = <?= json_encode($crop_area_size_data); ?>;
 const cropAreaSizeChart = new Chart(cropAreaSizeLineCtx, {
-    type: 'line', // Changed from 'scatter' to 'line' for proper line chart behavior
+    type: 'line',
     data: {
-        labels: groupedData.map(data => data.x),
+        labels: cropAreaSizeData.map(data => data.crop_name),
         datasets: [{
             label: 'Crop vs Harvest Area Size',
-            data: groupedData.map(data => ({
-                x: data.x,  // Crop name
-                y: data.y   // Harvest area size (summed)
-            })),
-            backgroundColor: 'rgba(241, 196, 15, 1)',
+            data: cropAreaSizeData.map(data => data.total_area_size),
+            backgroundColor: 'rgba(241, 196, 15, 0.5)',
             borderColor: 'rgba(241, 196, 15, 1)',
-            borderWidth: 1,
-            fill: false,
-            showLine: true,  // Ensure the line is shown
-            tension: 0.1 // Line smoothing (optional)
+            borderWidth: 2,
+            tension: 0.3
         }]
     },
     options: {
         responsive: true,
         scales: {
-            x: {
-                type: 'category',
-                labels: groupedData.map(data => data.x),
-                title: {
-                    display: true,
-                    text: 'Crop Name'
-                }
-            },
-            y: {
-                beginAtZero: true,
-                title: {
-                    display: true,
-                    text: 'Harvest Area Size'
-                }
-            }
+            x: { title: { display: true, text: 'Crop Name' } },
+            y: { title: { display: true, text: 'Harvest Area Size (in acres)' }, beginAtZero: true }
         }
     }
 });
@@ -770,7 +711,7 @@ const batchStatusChart = new Chart(batchStatusCtx, {
         datasets: [{
             label: 'Batch Status',
             data: batchStatusData.map(data => data.batch_count),
-            backgroundColor: 'rgba(46, 204, 113, 0.5)',
+            backgroundColor: 'rgba(46, 204, 113, 0.6)',
             borderColor: 'rgba(46, 204, 113, 1)',
             borderWidth: 1
         }]
@@ -778,9 +719,8 @@ const batchStatusChart = new Chart(batchStatusCtx, {
     options: {
         responsive: true,
         scales: {
-            x: {
-                beginAtZero: true
-            }
+            x: { title: { display: true, text: 'Batch Status' } },
+            y: { beginAtZero: true }
         }
     }
 });
@@ -795,13 +735,18 @@ const areaCropsChart = new Chart(areaCropsCtx, {
         datasets: [{
             label: 'Crops in District',
             data: areaCropsData.map(data => data.crop_count),
-            fill: false,
+            backgroundColor: 'rgba(52, 152, 219, 0.6)',
             borderColor: 'rgba(52, 152, 219, 1)',
-            tension: 0.1
+            tension: 0.3,
+            fill: false
         }]
     },
     options: {
-        responsive: true
+        responsive: true,
+        scales: {
+            x: { title: { display: true, text: 'Harvest District' } },
+            y: { beginAtZero: true }
+        }
     }
 });
 
@@ -820,14 +765,7 @@ const cropDistributionChart = new Chart(cropDistributionCtx, {
                 'rgba(52, 152, 219, 0.6)',
                 'rgba(241, 196, 15, 0.6)',
                 'rgba(231, 76, 60, 0.6)',
-                'rgba(155, 89, 182, 0.6)',
-            ],
-            borderColor: [
-                'rgba(46, 204, 113, 1)',
-                'rgba(52, 152, 219, 1)',
-                'rgba(241, 196, 15, 1)',
-                'rgba(231, 76, 60, 1)',
-                'rgba(155, 89, 182, 1)',
+                'rgba(155, 89, 182, 0.6)'
             ],
             borderWidth: 1
         }]

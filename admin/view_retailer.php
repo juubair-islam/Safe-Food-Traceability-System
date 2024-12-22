@@ -533,6 +533,51 @@ body {
     margin-top: 20px;
   }
 
+
+
+
+        /* Search & Add Farmer Section */
+        .search-add-section {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+      }
+
+      .search-box {
+        display: flex;
+        align-items: center;
+      }
+
+      .search-box input {
+        padding: 8px;
+        font-size: 14px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        width: 250px;
+      }
+
+      .search-box button {
+        padding: 8px 15px;
+        background-color: #2980b9;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+
+      .search-box button:hover {
+        background-color: #16a085;
+      }
+
+      .add-farmer-button {
+        padding: 10px 20px;
+        background-color: #27ae60;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+      }
+
     </style>
 </head>
 <body>
@@ -572,10 +617,16 @@ body {
 <div class="container">
     <h2>Manage Retailers</h2>
 
-    <form method="POST">
-        <input type="text" name="search" placeholder="Search retailers..." value="<?php echo $search; ?>" class="search-bar" />
-        <button type="submit">Search</button>
-    </form>
+
+
+    <div class="search-add-section">
+      <!-- Search box -->
+      <div class="search-box">
+      <input type="text" name="search" placeholder="Search retailers..." value="<?php echo $search; ?>" class="search-bar" />
+      <button type="submit">Search</button>
+      </div>
+      <a href="http://localhost:3000/Safe-Food-Traceability-System/admin/add_retailer.php" class="add-farmer-button">Add Retailer</a>
+    </div>
 
     <table class="retailer-table">
         <thead>

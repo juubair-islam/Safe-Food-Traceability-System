@@ -52,9 +52,9 @@ if (isset($_POST['search_retailer'])) {
 if (isset($_POST['search_batch'])) {
     $batch_id = $_POST['batch_id'];
     $batch_query = "
-        SELECT b.status, b.storage_condition, b.batch_date, c.name AS crop_name, c.quantity
+        SELECT b.status AS batch_status, b.batch_date, b.nutrition_value, c.name AS crop_name, c.quantity
         FROM batches b
-        LEFT JOIN crops c ON b.batch_id = c.batch_id
+        LEFT JOIN crops c ON b.crop_id = c.crop_id
         WHERE b.batch_id = ?";
     $stmt = $conn->prepare($batch_query);
     $stmt->bind_param('s', $batch_id);
@@ -62,7 +62,7 @@ if (isset($_POST['search_batch'])) {
     $stmt->store_result();
 
     if ($stmt->num_rows > 0) {
-        $stmt->bind_result($batch_status, $storage_condition, $batch_date, $crop_name, $quantity);
+        $stmt->bind_result($batch_status, $batch_date, $nutrition_value, $crop_name, $quantity);
         $stmt->fetch();
         $success_msg_batch = "Batch data loaded successfully!";
     } else {
@@ -70,6 +70,8 @@ if (isset($_POST['search_batch'])) {
     }
     $stmt->close();
 }
+
+
 
 // Handle form submission
 if (isset($_POST['submit_waste'])) {
