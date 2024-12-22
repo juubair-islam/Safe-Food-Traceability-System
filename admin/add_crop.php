@@ -489,7 +489,7 @@ body {
   <!-- Header Section -->
   <div class="header">
     <div class="logo-container">
-      <img src="../images/logo.png" alt="Logo" class="logo" />
+    <img src="../images/Logo.png" alt="Logo" />
       <div class="project-name">
         <strong>Farm to Fork</strong> <span>Safe Food Traceability System</span>
       </div>

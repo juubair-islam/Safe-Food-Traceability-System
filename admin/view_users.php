@@ -692,7 +692,8 @@ body {
         <input type="text" name="search" placeholder="Search users..." value="<?php echo $search; ?>" class="search-bar" />
         <button type="submit" class="search-btn">Search</button>
     </form>
-    <button class="add-user-btn">Add User</button>
+   <!-- Add User button with link -->
+   <a href="http://localhost:3000/Safe-Food-Traceability-System/admin/add_user.php" class="add-user-btn">Add User</a>
 </div>
 
 

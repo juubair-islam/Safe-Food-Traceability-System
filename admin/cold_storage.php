@@ -77,17 +77,134 @@ if (isset($_POST['release_from_cold_storage']) && isset($batch)) {
 
 
 
+
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cold Storage</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+    <title>Cold Storage Management & Live Temperature and Humidity</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
+    <
     <style>
+
+body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .dashboard {
+            background: #e8f5e9;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 800px;
+            text-align: center;
+        }
+
+        .cold-storage-container {
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 40px;
+        }
+
+        h2 {
+            color: #2e7d32;
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+            width: 100%;
+            max-width: 700px;
+            height: 400px;
+        }
+
+        .content-container {
+            padding: 30px;
+        }
+
+        .footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            position: absolute;
+            width: 100%;
+            bottom: 0;
+        }
+
+        .header {
+            padding: 20px;
+            background-color: #333;
+            color: white;
+            width: 100%;
+        }
+
+        .header .logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .header .logo {
+            width: 50px;
+            height: auto;
+            margin-right: 10px;
+        }
+
+        .header .project-name {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .header .role {
+            font-size: 18px;
+        }
+
+        .top-nav {
+            background-color: #333;
+            color: white;
+        }
+
+        .top-nav .nav-links ul {
+            padding: 0;
+            margin: 0;
+            list-style-type: none;
+            display: flex;
+        }
+
+        .top-nav .nav-links ul li {
+            margin-right: 20px;
+        }
+
+        .top-nav .nav-links ul li a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .top-nav .nav-links ul li a.active {
+            font-weight: bold;
+        }
+
+        .content-container h1 {
+            font-size: 32px;
+            font-weight: bold;
+        }
         body {
             background-color: #f8f9fa;
         }
@@ -598,12 +715,85 @@ body {
             ?>
         </tbody>
     </table>
+    
 </div>
 
-<!-- Footer -->
-<div class="footer">
-    <p>&copy; 2024 Safe Food Traceability System | All Rights Reserved</p>
-</div>
+    <!-- Live Temperature and Humidity Graph -->
+    <h2>Live Temperature and Humidity Graph</h2>
+    <canvas id="liveTempHumidityChart"></canvas>
+
+  </div>
+
+  <script>
+    const ctx = document.getElementById('liveTempHumidityChart').getContext('2d');
+    const timeLabels = [
+        '00:00', '00:05', '00:10', '00:15', '00:20',
+        '00:25', '00:30', '00:35', '00:40', '00:45'
+    ];
+
+    const liveChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: timeLabels,
+            datasets: [
+                {
+                    label: 'Temperature (°C)',
+                    data: Array(10).fill(0),
+                    borderColor: '#f44336',
+                    backgroundColor: 'rgba(244, 67, 54, 0.2)',
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 2
+                },
+                {
+                    label: 'Humidity (%)',
+                    data: Array(10).fill(0),
+                    borderColor: '#2196f3',
+                    backgroundColor: 'rgba(33, 150, 243, 0.2)',
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 2
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'top' },
+                title: { display: true, text: 'Live Temperature and Humidity Graph' }
+            },
+            scales: {
+                x: { type: 'category', title: { text: 'Time' } },
+                y: { beginAtZero: true, title: { text: 'Value' } }
+            }
+        }
+    });
+
+    function generateRandomData() {
+        const temperature = Math.random() * 15 + 20;
+        const humidity = Math.random() * 50 + 30;
+        return { temperature: temperature.toFixed(1), humidity: humidity.toFixed(1) };
+    }
+
+    function updateChart() {
+        const { temperature, humidity } = generateRandomData();
+
+        liveChart.data.datasets[0].data.shift();
+        liveChart.data.datasets[0].data.push(temperature);
+
+        liveChart.data.datasets[1].data.shift();
+        liveChart.data.datasets[1].data.push(humidity);
+
+        liveChart.update();
+    }
+
+    setInterval(updateChart, 1000);
+  </script>
+
+
+
+
+
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>

@@ -164,14 +164,17 @@ $conn->close();
 <body>
     <!-- Header Section -->
     <div class="header">
-        <img src="../images/logo.png" alt="Logo" />
-        <h1>Safe Food Traceability System</h1>
-        <h3>Farm to Fork</h3>
+        <a href="http://localhost:3000/Safe-Food-Traceability-System/admin/home.php">
+            <img src="../images/Logo.png" alt="Logo" />
+        </a>
+        <h1>Farm to Fork</h1>
+        <h3>Safe Food Traceability System</h3>
     </div>
+
 
     <!-- Login Form -->
     <div class="login-container">
-        <h2>Login to Safe Food Traceability System</h2>
+        <h2>Login to the System</h2>
 
         <!-- Display Error Messages -->
         <div id="message-container">

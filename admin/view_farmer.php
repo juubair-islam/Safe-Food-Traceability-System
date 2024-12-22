@@ -209,252 +209,447 @@ if (isset($_GET['delete_farmer_id'])) {
         padding: 10px;
         border-radius: 5px;
       }
-      
 
-      /* Logout button styling */
-    .logout-button {
-        float: right;
-        background-color: #d9534f;
-        color: white;
-        padding: 8px 12px;
-        text-decoration: none;
-        border-radius: 5px;
-        font-weight: bold;
-        transition: background-color 0.3s ease;
-      }
-      
-      .logout-button:hover {
-        background-color: #c9302c;
-        color: #fff;
-      }
-      
-      /* Ensure top navigation links are aligned correctly */
-      .top-nav ul {
-        display: flex;
-        justify-content: space-between; /* Spread out items including logout */
-        align-items: center;
-        list-style-type: none;
-        margin: 0;
-        padding: 0;
-      }
-      
-      .top-nav ul li {
-        margin-right: 15px;
-      }
-      
-      .top-nav ul li:last-child {
-        margin-right: 0; /* Remove right margin for the last item */
-      }
-
-
-      .top-nav ul li a:hover {
-        color: #fff;
-        background-color: #4CAF50;
-    }
-
-    /* General Styles */
-    body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 0;
-        background-color: #f4f4f4;
-      }
-      
-      /* Header */
-      .header {
-        background-color: #2c3e50;
-        color: white;
-        padding: 10px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-      
-      .logo-container {
-        display: flex;
-        align-items: center;
-      }
-      
-      .logo {
-        width: 40px;
-        margin-right: 10px;
-      }
-      
-      .project-name {
-        font-size: 18px;
-      }
-      
-      .role {
-        font-size: 22px;
-      }
-      
-      /* Navigation */
-      .top-nav {
-        background-color: #34495e;
-      }
-      
-      .top-nav ul {
-        list-style-type: none;
-        margin: 0;
-        padding: 0;
-        display: flex;
-      }
-      
-      .top-nav li {
-        padding: 10px;
-      }
-      
-      .top-nav a {
-        text-decoration: none;
-        color: white;
-        padding: 8px 16px;
-        display: block;
-      }
-      
-      .top-nav a:hover {
-        background-color: #2980b9;
-      }
-      
-      /* Main Content */
-      .dashboard-content {
-        padding: 20px;
-      }
-      
-      .add-crop-section {
+      /* Search & Add Farmer Section */
+      .search-add-section {
         display: flex;
         justify-content: space-between;
         margin-bottom: 20px;
       }
-      
-      .add-crop-button {
+
+      .search-box {
+        display: flex;
+        align-items: center;
+      }
+
+      .search-box input {
+        padding: 8px;
+        font-size: 14px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        width: 250px;
+      }
+
+      .search-box button {
+        padding: 8px 15px;
+        background-color: #2980b9;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+
+      .search-box button:hover {
+        background-color: #16a085;
+      }
+
+      .add-farmer-button {
         padding: 10px 20px;
         background-color: #27ae60;
         color: white;
         text-decoration: none;
         border-radius: 4px;
       }
-      
-      .search-bar {
-        padding: 8px;
-        width: 300px;
-        margin-right: 10px;
-        border-radius: 4px;
-        border: 1px solid #ccc;
-      }
-      
-      /* Table */
-      .crop-table {
+
+      /* Table Styles */
+      table {
         width: 100%;
         border-collapse: collapse;
         margin-top: 20px;
+        background-color: white;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
       }
-      
-      .crop-table th, .crop-table td {
-        padding: 10px;
-        text-align: left;
-        border-bottom: 1px solid #ddd;
-      }
-      
-      .crop-table th {
-        background-color: #2c3e50;
-        color: white;
-      }
-      
-      .crop-table tr:hover {
-        background-color: #f1f1f1;
-      }
-      
-      .crop-table td a {
-        color: #3498db;
-        text-decoration: none;
-      }
-      
-      .crop-table td a:hover {
-        text-decoration: underline;
-      }
-      
-      /* Footer */
-      .footer {
-        background-color: #2c3e50;
-        color: white;
+
+      th, td {
+        padding: 12px 15px;
         text-align: center;
-        padding: 10px;
-        margin-top: 20px;
+        border: 1px solid #ddd;
       }
 
-        /* Table Styles */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            background-color: white;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
+      th {
+        background-color: #2c3e50;
+        color: white;
+      }
 
-        th, td {
-            padding: 12px 15px;
-            text-align: center;
-            border: 1px solid #ddd;
-        }
+      tr:nth-child(even) {
+        background-color: #f2f2f2;
+      }
 
-        th {
-            background-color: #2c3e50;
-            color: white;
-        }
+      .action-btns a {
+        padding: 8px 15px;
+        border-radius: 5px;
+        color: white;
+        text-decoration: none;
+        font-weight: bold;
+        margin: 5px;
+        transition: background-color 0.3s ease;
+      }
 
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
+      .edit-btn {
+        background-color: #2980b9;
+      }
 
-        .action-btns a {
-            padding: 8px 15px;
-            border-radius: 5px;
-            color: white;
-            text-decoration: none;
-            font-weight: bold;
-            margin: 5px;
-            transition: background-color 0.3s ease;
-        }
+      .edit-btn:hover {
+        background-color: #16a085;
+      }
 
-        .edit-btn {
-            background-color: #2980b9;
-        }
+      .delete-btn {
+        background-color: #e74c3c;
+      }
 
-        .edit-btn:hover {
-            background-color: #16a085;
-        }
+      .delete-btn:hover {
+        background-color: #c0392b;
+      }
 
-        .delete-btn {
-            background-color: #e74c3c;
-        }
 
-        .delete-btn:hover {
-            background-color: #c0392b;
-        }
 
-        .search-box {
-            margin-bottom: 15px;
-            display: flex;
-            justify-content: flex-end;
-        }
+      /* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+  
+  h1, h2 {
+    color: #2c3e50;
+  }
+  
+/* Header Styles */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #2c3e50;
+    color: white;
+  }
+  
+  .header .logo-container {
+    display: flex;
+    align-items: center;
+    flex: 1;
+  }
+  
+  .header .logo {
+    height: 50px;
+    margin-right: 15px;
+  }
+  
+  .header .project-name {
+    display: flex;
+    flex-direction: column;
+    font-weight: bold;
+    font-size: 20px;
+    color: white;
+    margin-left: 10px;
+  }
+  
+  .header .project-name span {
+    font-size: 12px;
+    font-weight: normal;
+  }
+  
+  .header .role {
+    font-size: 18px;
+    font-weight: bold;
+    color: white;
+    text-align: right;
+    flex: 1; /* Align user role to the right */
+  }
+  
+  /* Top Navigation Bar */
+  .top-nav {
+    background-color: #34495e;
+    color: white;
+    display: flex;
+    justify-content: center;
+    padding: 10px 0;
+  }
+  
+  .top-nav .nav-links {
+    display: flex;
+    gap: 20px; /* Add spacing between options */
+  }
+  
+  .top-nav .nav-links ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+  }
+  
+  .top-nav .nav-links ul li {
+    display: inline-block;
+  }
+  
+  .top-nav .nav-links ul li a {
+    text-decoration: none;
+    color: white;
+    font-size: 16px;
+    padding: 8px 15px; /* Add padding to each option */
+    border-radius: 5px;
+    transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+    text-align: center;
+  }
+  
+  .top-nav .nav-links ul li a:hover {
+    background-color: #16a085; /* Highlight the hovered option */
+    color: white;
+  }
+  
+  .top-nav .nav-links ul li a.active {
+    background-color: #2980b9;
+    color: white;
+  }
+  
+  /* Footer Styles */
+  .footer {
+    background-color: #2c3e50;
+    color: white;
+    text-align: center;
+    padding: 5px 10px; /* Reduce footer padding for a compact size */
+    font-size: 12px; /* Smaller text for the footer */
+  }
+         
+  /* Dashboard Summary */
+  .dashboard-content {
+    padding: 20px;
+  }
+  
+  .summary-cards {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+  }
+  
+  .card {
+    background-color: #ecf0f1;
+    border-radius: 10px;
+    padding: 20px;
+    width: 200px;
+    text-align: center;
+  }
+  
+  .card h3 {
+    font-size: 1.5em;
+  }
+  
+  .card p {
+    font-size: 2em;
+    color: #2c3e50;
+  }
+  
+  /* Action Buttons */
+  .action-buttons {
+    display: flex;
+    justify-content: space-around;
+    margin: 20px 0;
+  }
+  
+  .action-buttons button {
+    padding: 10px 20px;
+    background-color: #2980b9;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .action-buttons button:hover {
+    background-color: #16a085;
+  }
+  
+  /* Recent Activity */
+  .recent-activity {
+    margin-top: 30px;
+  }
+  
+  .recent-activity ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .recent-activity ul li {
+    background-color: #ecf0f1;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 5px;
+  }
+  
 
-        .search-box input {
-            padding: 8px;
-            font-size: 14px;
-            border-radius: 4px;
-            border: 1px solid #ccc;
-            width: 250px;
-        }
+  /* Logout button styling */
+.logout-button {
+    float: right;
+    background-color: #d9534f;
+    color: white;
+    padding: 8px 12px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+  }
+  
+  .logout-button:hover {
+    background-color: #c9302c;
+    color: #fff;
+  }
+  
+  /* Ensure top navigation links are aligned correctly */
+  .top-nav ul {
+    display: flex;
+    justify-content: space-between; /* Spread out items including logout */
+    align-items: center;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .top-nav ul li {
+    margin-right: 15px;
+  }
+  
+  .top-nav ul li:last-child {
+    margin-right: 0; /* Remove right margin for the last item */
+  }
 
-        .footer {
-            text-align: center;
-            padding: 20px;
-            background-color: #2c3e50;
-            color: white;
-            position: fixed;
-            width: 100%;
-            bottom: 0;
-        }
+
+  .top-nav ul li a:hover {
+    color: #fff;
+    background-color: #4CAF50;
+}
+
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+  }
+  
+  /* Header */
+  .header {
+    background-color: #2c3e50;
+    color: white;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .logo-container {
+    display: flex;
+    align-items: center;
+  }
+  
+  .logo {
+    width: 40px;
+    margin-right: 10px;
+  }
+  
+  .project-name {
+    font-size: 18px;
+  }
+  
+  .role {
+    font-size: 22px;
+  }
+  
+  /* Navigation */
+  .top-nav {
+    background-color: #34495e;
+  }
+  
+  .top-nav ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+  }
+  
+  .top-nav li {
+    padding: 10px;
+  }
+  
+  .top-nav a {
+    text-decoration: none;
+    color: white;
+    padding: 8px 16px;
+    display: block;
+  }
+  
+  .top-nav a:hover {
+    background-color: #2980b9;
+  }
+  
+  /* Main Content */
+  .dashboard-content {
+    padding: 20px;
+  }
+  
+  .add-crop-section {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  
+  .add-crop-button {
+    padding: 10px 20px;
+    background-color: #27ae60;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+  }
+  
+  .search-bar {
+    padding: 8px;
+    width: 300px;
+    margin-right: 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+  }
+  
+  /* Table */
+  .crop-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  
+  .crop-table th, .crop-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .crop-table th {
+    background-color: #2c3e50;
+    color: white;
+  }
+  
+  .crop-table tr:hover {
+    background-color: #f1f1f1;
+  }
+  
+  .crop-table td a {
+    color: #3498db;
+    text-decoration: none;
+  }
+  
+  .crop-table td a:hover {
+    text-decoration: underline;
+  }
+  
+  /* Footer */
+  .footer {
+    background-color: #2c3e50;
+    color: white;
+    text-align: center;
+    padding: 10px;
+    margin-top: 20px;
+  }
+    </style>
     </style>
 </head>
 <body>
@@ -474,6 +669,10 @@ if (isset($_GET['delete_farmer_id'])) {
   <div class="top-nav">
     <div class="nav-links">
       <ul>
+  <!-- Top Navigation Bar -->
+  <div class="top-nav">
+    <div class="nav-links">
+      <ul>
       <li><a href="http://localhost:3000/Safe-Food-Traceability-System/admin/admin_dashboard.php">Dashboard</a></li>
         <li><a href="http://localhost:3000/Safe-Food-Traceability-System/admin/view_users.php">Manage Users</a></li>
         <li><a href="http://localhost:3000/Safe-Food-Traceability-System/admin/view_farmer.php"class="active">Farmer Details</a></li>
@@ -484,12 +683,30 @@ if (isset($_GET['delete_farmer_id'])) {
         <li><a href="http://localhost:3000/Safe-Food-Traceability-System/admin/cold_storage.php">Cold Storage</a></li>
         <li><a href="http://localhost:3000/Safe-Food-Traceability-System/admin/login.php" class="logout-button">Logout</a></li>
       </ul>
+    </div>
+  </div>
+      </ul>
       </ul>
     </div>
   </div>
 
+
 <div class="container">
     <h2>Farmers List</h2>
+
+
+
+    <div class="search-add-section">
+      <!-- Search box -->
+      <div class="search-box">
+        <input type="text" id="search" placeholder="Search for Farmer..." />
+        <button id="searchButton">Search</button>
+      </div>
+      <a href="http://localhost:3000/Safe-Food-Traceability-System/admin/add_farmer.php" class="add-farmer-button">Add Farmer</a>
+    </div>
+
+
+
     
     <!-- Success/Error Messages -->
     <?php if (isset($success_message)): ?>
@@ -499,10 +716,7 @@ if (isset($_GET['delete_farmer_id'])) {
         <div class="message error-message"><?php echo $error_message; ?></div>
     <?php endif; ?>
 
-    <!-- Search Box -->
-    <div class="search-box">
-        <input type="text" id="search" placeholder="Search farmers...">
-    </div>
+
 
     <!-- Farmers Data Table -->
     <table id="farmers_table">
@@ -530,14 +744,12 @@ if (isset($_GET['delete_farmer_id'])) {
                     <td><?php echo $farmer['nid_number']; ?></td>
                     <td><?php echo $farmer['fathers_name']; ?></td>
                     <td><?php echo $farmer['mothers_name']; ?></td>
-                    <td class="action-btns">
-                    <a href="edit_farmer.php?farmer_id=<?php echo $farmer['farmer_id']; ?>" class="edit-btn">Edit</a>
+                    <td class='action-btns'>
+                        <a href='?delete_farmer_id=<?php echo $row['farmer_id']; ?>' class='delete-btn' onclick='return confirm("Are you sure you want to delete this farmer?")'>Delete</a>
+                    </td>
 
-                    <!-- Delete Form -->
-                    <form action="" method="get" style="display:inline;">
-                        <input type="hidden" name="delete_farmer_id" value="<?php echo $farmer['farmer_id']; ?>">
-                        <button type="submit" class="delete-btn" onclick="return confirm('Are you sure you want to delete this farmer?');">Delete</button>
-                    </form>
+                  
+                   
                 </td>
 
                 </tr>
